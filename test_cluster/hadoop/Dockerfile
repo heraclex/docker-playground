@@ -2,19 +2,20 @@ FROM test_cluster_centos7-java8:latest
 MAINTAINER Toan Le (https://www.linkedin.com/in/toanlee/)
 
 ARG HADOOP_VERSION=3.2.1
-
 ARG HIVE_VERSION=3.1.2
+ARG SPARK_VERSION=3.2.1
 
 ARG TAR=hadoop-$HADOOP_VERSION.tar.gz
+ARG AWS_SDK_VERSION=1.11.375
+
 
 ENV PATH $PATH:/hadoop/bin:/hive/bin/
-ENV SPARK_VERSION=3.2.1
+# ENV SPARK_VERSION=3.2.1
 ENV SPARK_HOME=/usr/spark-${SPARK_VERSION}
 
 ###### Its a hack for now #######
 ENV SPARK_DIST_CLASSPATH=/hadoop-${HADOOP_VERSION}/etc/hadoop:/${HADOOP_VERSION}/share/hadoop/common/lib/*:/hadoop-${HADOOP_VERSION}/share/hadoop/common/*:/hadoop-${HADOOP_VERSION}/share/hadoop/hdfs:/hadoop-${HADOOP_VERSION}/share/hadoop/hdfs/lib/*:/hadoop-${HADOOP_VERSION}/share/hadoop/hdfs/*:/hadoop-${HADOOP_VERSION}/share/hadoop/yarn/lib/*:/hadoop-${HADOOP_VERSION}/share/hadoop/yarn/*:/hadoop-${HADOOP_VERSION}/share/hadoop/mapreduce/lib/*:/hadoop-${HADOOP_VERSION}/share/hadoop/mapreduce/*:/hadoop/contrib/capacity-scheduler/*.jar:/hive/lib/*
 ###### Its a hack for now #######
-
 
 LABEL Description="Hadoop Dev", \
       "Hadoop Version"="$HADOOP_VERSION"
@@ -76,6 +77,11 @@ RUN set -euxo pipefail && \
     rm -rf /var/cache/yum && \
     mkdir /root/.ssh && \
     chmod 0700 /root/.ssh
+
+
+# Add hadoop-aws and aws-sdk
+RUN wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_VERSION}/hadoop-aws-${HADOOP_VERSION}.jar -P $SPARK_HOME/jars/ && \ 
+    wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${AWS_SDK_VERSION}/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar -P $SPARK_HOME/jars/
     
 
 COPY entrypoint.sh /

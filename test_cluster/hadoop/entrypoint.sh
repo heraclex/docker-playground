@@ -7,7 +7,10 @@ set -euo pipefail
 srcdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 export JAVA_HOME="${JAVA_HOME:-/usr}"
-echo "export JAVA_HOME=$JAVA_HOME" 
+echo "export JAVA_HOME=$JAVA_HOME"
+
+# Hadoop shell scripts assume USER is defined
+export USER="${USER:-$(whoami)}"
 
 export PATH="$PATH:/hadoop/sbin:/hadoop/bin"
 export PATH="$PATH:$HOME/downloads"
