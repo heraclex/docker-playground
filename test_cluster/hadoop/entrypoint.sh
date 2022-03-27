@@ -7,15 +7,18 @@ set -euo pipefail
 srcdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 export JAVA_HOME="${JAVA_HOME:-/usr}"
+echo "export JAVA_HOME=$JAVA_HOME" 
 
 export PATH="$PATH:/hadoop/sbin:/hadoop/bin"
 export PATH="$PATH:$HOME/downloads"
 
 export HDFS_NAMENODE_USER="root"
 export HDFS_DATANODE_USER="root"
+export HDFS_DATANODE_SECURE_USER="root"
 export HDFS_SECONDARYNAMENODE_USER="root"
 export YARN_RESOURCEMANAGER_USER="root"
 export YARN_NODEMANAGER_USER="root"
+
 
 if [ $# -gt 0 ]; then
     exec $@
@@ -75,9 +78,9 @@ else
     #  ./root/downloads/mc cp ./root/downloads/dummy myminio/de-sb-data-lake/hive/default/dummy
 
     # start hadoop
-
-    hdfs namenode -format
-    chmod -R 777 /usr/local/Cellar/hadoop/hdfs/tmp
+    # echo "format namenode..." 
+    # yes | hdfs namenode -format
+    # chmod -R 777 /usr/local/Cellar/hadoop/hdfs/tmp
     start-dfs.sh
     start-yarn.sh
 

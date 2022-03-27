@@ -1,7 +1,7 @@
 FROM test_cluster_centos7-java8:latest
 MAINTAINER Toan Le (https://www.linkedin.com/in/toanlee/)
 
-ARG HADOOP_VERSION=3.2.0
+ARG HADOOP_VERSION=3.2.1
 
 ARG HIVE_VERSION=3.1.2
 
@@ -12,7 +12,7 @@ ENV SPARK_VERSION=3.2.1
 ENV SPARK_HOME=/usr/spark-${SPARK_VERSION}
 
 ###### Its a hack for now #######
-ENV SPARK_DIST_CLASSPATH=/hadoop-3.2.0/etc/hadoop:/hadoop-3.2.0/share/hadoop/common/lib/*:/hadoop-3.2.0/share/hadoop/common/*:/hadoop-3.2.0/share/hadoop/hdfs:/hadoop-3.2.0/share/hadoop/hdfs/lib/*:/hadoop-3.2.0/share/hadoop/hdfs/*:/hadoop-3.2.0/share/hadoop/yarn/lib/*:/hadoop-3.2.0/share/hadoop/yarn/*:/hadoop-3.2.0/share/hadoop/mapreduce/lib/*:/hadoop-3.2.0/share/hadoop/mapreduce/*:/hadoop/contrib/capacity-scheduler/*.jar:/hive/lib/*
+ENV SPARK_DIST_CLASSPATH=/hadoop-${HADOOP_VERSION}/etc/hadoop:/${HADOOP_VERSION}/share/hadoop/common/lib/*:/hadoop-${HADOOP_VERSION}/share/hadoop/common/*:/hadoop-${HADOOP_VERSION}/share/hadoop/hdfs:/hadoop-${HADOOP_VERSION}/share/hadoop/hdfs/lib/*:/hadoop-${HADOOP_VERSION}/share/hadoop/hdfs/*:/hadoop-${HADOOP_VERSION}/share/hadoop/yarn/lib/*:/hadoop-${HADOOP_VERSION}/share/hadoop/yarn/*:/hadoop-${HADOOP_VERSION}/share/hadoop/mapreduce/lib/*:/hadoop-${HADOOP_VERSION}/share/hadoop/mapreduce/*:/hadoop/contrib/capacity-scheduler/*.jar:/hive/lib/*
 ###### Its a hack for now #######
 
 
@@ -37,9 +37,6 @@ RUN set -euxo pipefail && \
     ln -sv "hadoop-$HADOOP_VERSION" hadoop && \
     rm -fv "$TAR" && \
     { rm -rf hadoop/share/doc; : ; } && \
-    # Hadoop 1.x
-    #/hadoop/bin/hadoop namenode -format && \
-    # Hadoop 2.x & 3.x
     /hadoop/bin/hdfs namenode -format && \
     # gets autoremoved, ensure it's added back as Hadoop scripts need it
     rm -f /hadoop/share/hadoop/common/lib/jackson*.jar && \
