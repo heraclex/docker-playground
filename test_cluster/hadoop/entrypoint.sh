@@ -68,31 +68,18 @@ else
 
     sed -i "s/localhost/$hostname/" "${HADOOP_HOME}/etc/hadoop/core-site.xml"
 
-
     # start hadoop
-
-    # echo "format namenode..." 
-    # yes | hdfs namenode -format
-    # chmod -R 777 /usr/local/Cellar/hadoop/hdfs/tmp
     start-dfs.sh
     start-yarn.sh
-
-    # start hive
-    # hadoop fs -mkdir       /tmp
-    # hadoop fs -mkdir -p    /user/hive/warehouse
-    # hadoop fs -chmod g+w   /tmp
-    # hadoop fs -chmod g+w   /user/hive/warehouse
     
-    echo "Configuring Hive..."
-    
+    # fixing error java.lang.NoSuchMethodError com.google.common.base.Preconditions.checkArgument
+    # https://issues.apache.org/jira/browse/HIVE-22915?page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel&focusedCommentId=17196051#comment-17196051
+    echo "Replacing guava "
     rm "${HIVE_HOME}/lib/guava-19.0.jar"
     cp "${HADOOP_HOME}/share/hadoop/hdfs/lib/guava-27.0-jre.jar" "${HIVE_HOME}/lib/"
-
-    # schematool -dbType postgres -initSchema
-
-    # Start metastore service.
+    
+    echo "Start metastore service..."
     hive --service metastore &
-
     # JDBC Server.
     hiveserver2 &
   
@@ -100,6 +87,12 @@ else
     # ./hive --service metastore &
     # ./hiveserver2 --hiveconf hive.server2.enable.doAs=false &
     # cd /
+
+     # start spark-standalone
+     echo "Start Spark Engine..."
+    "$SPARK_HOME/sbin/start-all.sh"
+    # TODO : fail to start worker, fix it
+    # "$SPARK_HOME/sbin/spark-daemon.sh start org.apache.spark.deploy.worker.Worker 1 --webui-port 8081 spark://localhost:7077"
 
     tail -f /dev/null "${HADOOP_LOG_DIR}/*"
 
