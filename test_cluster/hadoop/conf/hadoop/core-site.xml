@@ -3,12 +3,12 @@
 <configuration>
     <property>
         <name>fs.defaultFS</name>
-        <value>hdfs://localhost:9000</value>
+        <value>hdfs://hadoop:9000</value>
     </property>
 
     <property>
         <name>fs.default.name</name>
-        <value>hdfs://localhost:9000</value>
+        <value>hdfs://hadoop:9000</value>
     </property>
 
     <!-- This is where here namenode stores its metadata, and  where HDFS

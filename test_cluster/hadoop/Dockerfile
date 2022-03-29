@@ -14,6 +14,17 @@ RUN yum -y update
 
 ################################ Package setup ################################
 
+# Minio for arm64
+ARG MINIO_VERSION=linux-arm64
+ENV MINIO_HOME /usr/minio
+ENV PATH="${PATH}:${MINIO_HOME}"
+RUN mkdir ${MINIO_HOME} && \
+    curl --progress-bar -L "https://dl.min.io/server/minio/release/${MINIO_VERSION}/minio" --output "${MINIO_HOME}/minio" && \
+    curl --progress-bar -L "https://dl.min.io/client/mc/release/${MINIO_VERSION}/mc" --output "${MINIO_HOME}/mc" && \
+    chown -R root:root "${MINIO_HOME}" && \
+    chmod +x ${MINIO_HOME}/minio && \
+    chmod +x ${MINIO_HOME}/mc
+
 # Hadoop
 ARG HADOOP_VERSION=3.2.1
 ENV HADOOP_HOME /usr/hadoop
@@ -56,11 +67,11 @@ RUN curl --progress-bar -L \
 
 
 
-
 # Spark
 ARG SPARK_VERSION=3.2.1
 ARG SPARK_PACKAGE="spark-${SPARK_VERSION}-bin-without-hadoop"
 ENV SPARK_HOME /usr/spark
+ENV PATH="${PATH}:${SPARK_HOME}/sbin:${SPARK_HOME}/bin"
 RUN curl --progress-bar -L --retry 3 \
   "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/${SPARK_PACKAGE}.tgz" \
   | gunzip \
@@ -75,6 +86,10 @@ RUN curl --progress-bar -L \
     "https://repo1.maven.org/maven2/org/apache/spark/spark-hive_${SCALA_VERSION}/${SPARK_VERSION}/spark-hive_${SCALA_VERSION}-${SPARK_VERSION}.jar" \
     --output "${SPARK_HOME}/jars/spark-hive_${SCALA_VERSION}-${SPARK_VERSION}.jar"
 
+RUN yum clean all && \
+    rm -rf /var/cache/yum && \
+    mkdir /root/.ssh && \
+    chmod 0700 /root/.ssh
 
 
 
@@ -83,6 +98,9 @@ RUN curl --progress-bar -L \
 # Common settings
 # ENV JAVA_HOME "/usr/lib/jvm/java-1.8-openjdk"
 ENV PATH="${PATH}:${JAVA_HOME}/bin"
+
+# minio setup
+COPY conf/minio/minio-config.json /root/.mc/config.json
 
 # Hadoop setup
 ENV HDFS_NAMENODE_USER="root"
@@ -105,7 +123,6 @@ ENV HADOOP_CLASSPATH="${HADOOP_CLASSPATH}:${HIVE_HOME}/lib/*"
 COPY conf/hive/hive-site.xml "${HIVE_CONF_DIR}"
 
 # Spark setup
-ENV PATH="${PATH}:${SPARK_HOME}/bin"
 ENV SPARK_CONF_DIR="${SPARK_HOME}/conf"
 ENV SPARK_LOG_DIR="${SPARK_HOME}/logs"
 ENV SPARK_DIST_CLASSPATH="${HADOOP_CONF_DIR}:${HADOOP_HOME}/share/hadoop/tools/lib/*:${HADOOP_HOME}/share/hadoop/common/lib/*:${HADOOP_HOME}/share/hadoop/common/*:${HADOOP_HOME}/share/hadoop/hdfs:${HADOOP_HOME}/share/hadoop/hdfs/lib/*:${HADOOP_HOME}/share/hadoop/hdfs/*:${HADOOP_HOME}/share/hadoop/mapreduce/lib/*:${HADOOP_HOME}/share/hadoop/mapreduce/*:${HADOOP_HOME}/share/hadoop/yarn:${HADOOP_HOME}/share/hadoop/yarn/lib/*:${HADOOP_HOME}/share/hadoop/yarn/*"
@@ -130,8 +147,6 @@ RUN rm -rf "${HIVE_HOME}/examples" \
 HEALTHCHECK CMD curl -f http://host.docker.internal:8080/ \
     && curl -f http://host.docker.internal:8088/ || exit 1
 
-
-# COPY conf/minio/minio-config.json /root/.mc/config.json
 
 COPY ssh/config /root/.ssh/
 EXPOSE 8020 8042 8088 9000 10020 19888 50010 50020 50070 50075 50090 9009 10000 10002 4040 7077 8080 8081

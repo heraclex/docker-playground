@@ -9,14 +9,14 @@
 			"lookup": "dns"
 		},
 		"local": {
-			"url": "http://localhost:9000",
+			"url": "http://hadoop:9000",
 			"accessKey": "",
 			"secretKey": "",
 			"api": "S3v4",
 			"lookup": "auto"
 		},
 		"myminio": {
-			"url": "http://localhost:9009",
+			"url": "http://hadoop:9009",
 			"accessKey": "minio",
 			"secretKey": "minio123",
 			"api": "s3v4",

@@ -68,6 +68,13 @@ else
 
     sed -i "s/localhost/$hostname/" "${HADOOP_HOME}/etc/hadoop/core-site.xml"
 
+    # start minio
+    echo "Start Minio"
+    MINIO_ROOT_USER=minio MINIO_ROOT_PASSWORD=minio123 minio server /data --console-address ":9009" & 
+    while [ $(ps -aef | grep minio | grep 9009 | wc -l) != 1 ]; do  printf '.'; sleep 1; done
+    mc alias set myminio http://hadoop:9009 minio minio123
+    # mc mb myminio/de-sb-logs 
+
     # start hadoop
     start-dfs.sh
     start-yarn.sh
