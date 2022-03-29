@@ -22,6 +22,9 @@ RUN set -euxo pipefail && \
     yum clean all && \
     rm -rf /var/cache/yum
 
+RUN set -euxo pipefail && \
+    yum install -y openssh-server openssh-clients tar which
+
 COPY profile.d/java.sh /etc/profile.d/
 
 #CMD /bin/bash

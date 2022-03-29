@@ -10,26 +10,27 @@ export JAVA_HOME="${JAVA_HOME:-/usr}"
 echo "export JAVA_HOME=$JAVA_HOME"
 
 # Hadoop shell scripts assume USER is defined
-export USER="${USER:-$(whoami)}"
+# export USER="${USER:-$(whoami)}"
 
-export PATH="$PATH:/hadoop/sbin:/hadoop/bin"
-export PATH="$PATH:$HOME/downloads"
+# export PATH="$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin"
+# export PATH="$PATH:$HOME/downloads"
 
-export HDFS_NAMENODE_USER="root"
-export HDFS_DATANODE_USER="root"
-export HDFS_DATANODE_SECURE_USER="root"
-export HDFS_SECONDARYNAMENODE_USER="root"
-export YARN_RESOURCEMANAGER_USER="root"
-export YARN_NODEMANAGER_USER="root"
+# export HDFS_NAMENODE_USER="root"
+# export HDFS_DATANODE_USER="root"
+# export HDFS_DATANODE_SECURE_USER="root"
+# export HDFS_SECONDARYNAMENODE_USER="root"
+# export YARN_RESOURCEMANAGER_USER="root"
+# export YARN_NODEMANAGER_USER="root"
 
 
 if [ $# -gt 0 ]; then
     exec $@
 else
     if ! [ -f /root/.ssh/authorized_keys ]; then
+        echo "run ssh-keygen"
         ssh-keygen -t rsa -b 1024 -f /root/.ssh/id_rsa -N ""
         cp -v /root/.ssh/{id_rsa.pub,authorized_keys}
-        chmod -v 0400 /root/.ssh/authorized_keys
+        chmod -v 0600 /root/.ssh/authorized_keys
     fi
 
     if ! [ -f /etc/ssh/ssh_host_rsa_key ]; then
@@ -63,24 +64,13 @@ else
         ssh-keyscan $hostname || :
     fi | tee -a /root/.ssh/known_hosts
 
-    mkdir -pv /hadoop/logs
+    mkdir -pv "${HADOOP_LOG_DIR}"
 
-    sed -i "s/localhost/$hostname/" /hadoop/etc/hadoop/core-site.xml
+    sed -i "s/localhost/$hostname/" "${HADOOP_HOME}/etc/hadoop/core-site.xml"
 
-    # start minio
-    MINIO_ROOT_USER=minio MINIO_ROOT_PASSWORD=minio123 minio server /data --console-address ":9009" & 
-    while [ $(ps -aef | grep minio | grep 9009 | wc -l) != 1 ]; do  printf '.'; sleep 1; done
-    # ./root/downloads/mc alias set myminio http://127.0.0.1:9009 minio minio123
-    # ./root/downloads/mc config host add myminio http://127.0.0.1:9009 minio minio123
-    # until(./root/downloads/mc config host add myminio http://127.0.0.1:9009 minio minio123) do echo '...waiting...' && sleep 1; done;
-    # ./root/downloads/mc mb myminio/de-sb-logs 
-    #  ./root/downloads/mc mb myminio/de-sb-data-lake
-    #  ./root/downloads/mc mb myminio/de-dev-sb-data-lake
-    #  ./root/downloads/mc mb myminio/de-staging-sb-data-lake
-    #  touch ./root/downloads/dummy 
-    #  ./root/downloads/mc cp ./root/downloads/dummy myminio/de-sb-data-lake/hive/default/dummy
 
     # start hadoop
+
     # echo "format namenode..." 
     # yes | hdfs namenode -format
     # chmod -R 777 /usr/local/Cellar/hadoop/hdfs/tmp
@@ -88,24 +78,30 @@ else
     start-yarn.sh
 
     # start hive
-    hadoop fs -mkdir       /tmp
-    hadoop fs -mkdir -p    /user/hive/warehouse
-    hadoop fs -chmod g+w   /tmp
-    hadoop fs -chmod g+w   /user/hive/warehouse
+    # hadoop fs -mkdir       /tmp
+    # hadoop fs -mkdir -p    /user/hive/warehouse
+    # hadoop fs -chmod g+w   /tmp
+    # hadoop fs -chmod g+w   /user/hive/warehouse
+    
+    echo "Configuring Hive..."
+    
+    rm "${HIVE_HOME}/lib/guava-19.0.jar"
+    cp "${HADOOP_HOME}/share/hadoop/hdfs/lib/guava-27.0-jre.jar" "${HIVE_HOME}/lib/"
+
+    # schematool -dbType postgres -initSchema
+
+    # Start metastore service.
+    hive --service metastore &
+
+    # JDBC Server.
+    hiveserver2 &
   
-    cd /hive/bin
-    ./hive --service metastore &
-    ./hiveserver2 --hiveconf hive.server2.enable.doAs=false &
-    cd /
+    # cd /hive/bin
+    # ./hive --service metastore &
+    # ./hiveserver2 --hiveconf hive.server2.enable.doAs=false &
+    # cd /
 
-    # start spark-standalone
-    export SPARK_DIST_CLASSPATH=$(hadoop classpath)  
-    export SPARK_DIST_CLASSPATH=$SPARK_DIST_CLASSPATH:/hive/lib/* 
-    "$SPARK_HOME/sbin/start-all.sh"
-    # TODO : fail to start worker, fix it
-    /usr/spark-3.2.1/sbin/spark-daemon.sh start org.apache.spark.deploy.worker.Worker 1 --webui-port 8081 spark://50093de8bfe8:7077
-
-    tail -f /dev/null /hadoop/logs/*
+    tail -f /dev/null "${HADOOP_LOG_DIR}/*"
 
     stop-yarn.sh
     stop-dfs.sh
