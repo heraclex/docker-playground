@@ -40,6 +40,10 @@ RUN curl --progress-bar -L --retry 3 \
     yum install -y hostname && \
     yum install -y net-tools 
 
+RUN mkdir -pv "${HADOOP_HOME}/tmp" && \
+    mkdir -pv "${HADOOP_HOME}/dfs/name" && \
+    mkdir -pv "${HADOOP_HOME}/dfs/data"
+
 
 # Hive
 ARG POSTGRESSQL_VERSION=42.3.3

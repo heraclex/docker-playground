@@ -72,8 +72,13 @@ else
     echo "Start Minio"
     MINIO_ROOT_USER=minio MINIO_ROOT_PASSWORD=minio123 minio server /data --console-address ":9009" & 
     while [ $(ps -aef | grep minio | grep 9009 | wc -l) != 1 ]; do  printf '.'; sleep 1; done
-    mc alias set myminio http://hadoop:9009 minio minio123
-    # mc mb myminio/de-sb-logs 
+    # https://docs.min.io/docs/minio-client-complete-guide.html
+    mc alias set myminio http://hadoop:9000 minio minio123 --api S3v4
+    mc mb myminio/de-logs 
+    mc mb myminio/de-data-lake
+    # create dummy file to test
+    touch "${MINIO_HOME}/dummy" 
+    mc cp "${MINIO_HOME}/dummy" myminio/de-data-lake/hive/default/dummy
 
     # start hadoop
     start-dfs.sh
@@ -99,9 +104,9 @@ else
      echo "Start Spark Engine..."
     "$SPARK_HOME/sbin/start-all.sh"
     # TODO : fail to start worker, fix it
-    # "$SPARK_HOME/sbin/spark-daemon.sh start org.apache.spark.deploy.worker.Worker 1 --webui-port 8081 spark://localhost:7077"
+    spark-daemon.sh start org.apache.spark.deploy.worker.Worker 1 --webui-port 8081 spark://hadoop:7077
 
-    tail -f /dev/null "${HADOOP_LOG_DIR}/*"
+    tail -f /dev/null ${HADOOP_LOG_DIR}/*
 
     stop-yarn.sh
     stop-dfs.sh
