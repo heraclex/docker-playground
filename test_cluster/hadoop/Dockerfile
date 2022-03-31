@@ -11,16 +11,16 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ################################ Package setup ################################
 
-# Minio for arm64
-ARG MINIO_VERSION=linux-arm64
-ENV MINIO_HOME /usr/minio
-ENV PATH="${PATH}:${MINIO_HOME}"
-RUN mkdir ${MINIO_HOME} && \
-    curl --progress-bar -L "https://dl.min.io/server/minio/release/${MINIO_VERSION}/minio" --output "${MINIO_HOME}/minio" && \
-    curl --progress-bar -L "https://dl.min.io/client/mc/release/${MINIO_VERSION}/mc" --output "${MINIO_HOME}/mc" && \
-    chown -R root:root "${MINIO_HOME}" && \
-    chmod +x ${MINIO_HOME}/minio && \
-    chmod +x ${MINIO_HOME}/mc
+# # Minio for arm64
+# ARG MINIO_VERSION=linux-arm64
+# ENV MINIO_HOME /usr/minio
+# ENV PATH="${PATH}:${MINIO_HOME}"
+# RUN mkdir ${MINIO_HOME} && \
+#     curl --progress-bar -L "https://dl.min.io/server/minio/release/${MINIO_VERSION}/minio" --output "${MINIO_HOME}/minio" && \
+#     curl --progress-bar -L "https://dl.min.io/client/mc/release/${MINIO_VERSION}/mc" --output "${MINIO_HOME}/mc" && \
+#     chown -R root:root "${MINIO_HOME}" && \
+#     chmod +x ${MINIO_HOME}/minio && \
+#     chmod +x ${MINIO_HOME}/mc
 
 # Hadoop
 ARG HADOOP_VERSION=3.2.1
@@ -101,7 +101,7 @@ RUN yum clean all && \
 ENV PATH="${PATH}:${JAVA_HOME}/bin"
 
 # minio setup
-COPY conf/minio/minio-config.json /root/.mc/config.json
+# COPY conf/minio/minio-config.json /root/.mc/config.json
 
 # Hadoop setup
 ENV HDFS_NAMENODE_USER="root"
@@ -150,8 +150,7 @@ HEALTHCHECK CMD curl -f http://host.docker.internal:8080/ \
 
 
 COPY ssh/config /root/.ssh/
-EXPOSE 8020 8042 8088 9000 10020 19888 50010 50020 50070 50075 50090 9009 10000 10002 4040 7077 8080 8081
-
+EXPOSE 8020 8042 8088 9000 10020 19888 50010 50020 50070 50075 50090 10000 10002 4040 7077 8080 8081
 
 
 # Entry point: start all services and applications.

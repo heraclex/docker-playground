@@ -48,7 +48,7 @@
     </property>
     <property>
         <name>spark.yarn.jars</name>
-        <value>hdfs://master:9000/spark-jars/*</value>
+        <value>hdfs://hadoop:9000/spark-jars/*</value>
     </property>
 
     <!-- To be able to execute Hive queries from Zeppelin -->

@@ -6,8 +6,8 @@ set -euo pipefail
 
 srcdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-export JAVA_HOME="${JAVA_HOME:-/usr}"
-echo "export JAVA_HOME=$JAVA_HOME"
+# export JAVA_HOME="${JAVA_HOME:-/usr}"
+# echo "export JAVA_HOME=$JAVA_HOME"
 
 # Hadoop shell scripts assume USER is defined
 # export USER="${USER:-$(whoami)}"
@@ -68,17 +68,17 @@ else
 
     sed -i "s/localhost/$hostname/" "${HADOOP_HOME}/etc/hadoop/core-site.xml"
 
-    # start minio
-    echo "Start Minio"
-    MINIO_ROOT_USER=minio MINIO_ROOT_PASSWORD=minio123 minio server /data --console-address ":9009" & 
-    while [ $(ps -aef | grep minio | grep 9009 | wc -l) != 1 ]; do  printf '.'; sleep 1; done
-    # https://docs.min.io/docs/minio-client-complete-guide.html
-    mc alias set myminio http://hadoop:9000 minio minio123 --api S3v4
-    mc mb myminio/de-logs 
-    mc mb myminio/de-data-lake
-    # create dummy file to test
-    touch "${MINIO_HOME}/dummy" 
-    mc cp "${MINIO_HOME}/dummy" myminio/de-data-lake/hive/default/dummy
+    # # start minio
+    # echo "Start Minio"
+    # MINIO_ROOT_USER=minio MINIO_ROOT_PASSWORD=minio123 minio server /data --console-address ":9009" & 
+    # while [ $(ps -aef | grep minio | grep 9009 | wc -l) != 1 ]; do  printf '.'; sleep 1; done
+    # # https://docs.min.io/docs/minio-client-complete-guide.html
+    # mc alias set myminio http://hadoop:9000 minio minio123 --api S3v4
+    # mc mb myminio/de-logs 
+    # mc mb myminio/de-data-lake
+    # # create dummy file to test
+    # touch "${MINIO_HOME}/dummy" 
+    # mc cp "${MINIO_HOME}/dummy" myminio/de-data-lake/hive/default/dummy
 
     # start hadoop
     start-dfs.sh
