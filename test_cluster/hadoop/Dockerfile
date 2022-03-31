@@ -11,17 +11,6 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ################################ Package setup ################################
 
-# # Minio for arm64
-# ARG MINIO_VERSION=linux-arm64
-# ENV MINIO_HOME /usr/minio
-# ENV PATH="${PATH}:${MINIO_HOME}"
-# RUN mkdir ${MINIO_HOME} && \
-#     curl --progress-bar -L "https://dl.min.io/server/minio/release/${MINIO_VERSION}/minio" --output "${MINIO_HOME}/minio" && \
-#     curl --progress-bar -L "https://dl.min.io/client/mc/release/${MINIO_VERSION}/mc" --output "${MINIO_HOME}/mc" && \
-#     chown -R root:root "${MINIO_HOME}" && \
-#     chmod +x ${MINIO_HOME}/minio && \
-#     chmod +x ${MINIO_HOME}/mc
-
 # Hadoop
 ARG HADOOP_VERSION=3.2.1
 ENV HADOOP_HOME /usr/hadoop
@@ -60,8 +49,6 @@ RUN curl --progress-bar -L \
     chmod 777 "${HIVE_HOME}/hcatalog/var/log" && \
     chmod 777 "${HIVE_HOME}/var/log"
 
-# RUN curl --progress-bar -L -o ${HIVE_HOME}/lib/postgresql-jdbc.jar \ 
-#     "https://jdbc.postgresql.org/download/postgresql-${POSTGRESSQL_VERSION}.jar"
 RUN curl --progress-bar -L \
     "https://jdbc.postgresql.org/download/postgresql-${POSTGRESSQL_VERSION}.jar" \
     --output ${HIVE_HOME}/lib/postgresql-jdbc.jar
@@ -99,9 +86,6 @@ RUN yum clean all && \
 # Common settings
 # ENV JAVA_HOME "/usr/lib/jvm/java-1.8-openjdk"
 ENV PATH="${PATH}:${JAVA_HOME}/bin"
-
-# minio setup
-# COPY conf/minio/minio-config.json /root/.mc/config.json
 
 # Hadoop setup
 ENV HDFS_NAMENODE_USER="root"
