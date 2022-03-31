@@ -10,6 +10,9 @@ ARG JAVA_RELEASE=JDK
 
 ENV JAVA_HOME=/usr
 
+# update all packages include curl
+RUN yum -y update
+
 RUN set -euxo pipefail && \
     pkg="java-1.$JAVA_VERSION.0-openjdk" && \
     if [ "$JAVA_RELEASE" = "JDK" ]; then \

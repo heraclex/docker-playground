@@ -1,4 +1,4 @@
-FROM test_cluster_centos7-java8:latest
+FROM local/centos7-java8:latest
 MAINTAINER Toan Le (https://www.linkedin.com/in/toanlee/)
 
 LABEL Description="Hadoop Dev", \
@@ -8,9 +8,6 @@ WORKDIR /
 
 # https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
-# update all packages include curl
-RUN yum -y update
 
 ################################ Package setup ################################
 

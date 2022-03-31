@@ -1,9 +1,21 @@
 version: '3.1'
 services:
+
+  centos7-java8:
+    build:
+      context: ./centos7-java8
+      dockerfile: Dockerfile
+    image: local/centos7-java8
+    container_name: centos7-java8
+    volumes:
+      - ./shared:/root/shared
+
   hivemetastore:
     build:
       context: ./metastore
       dockerfile: Dockerfile
+    container_name: hivemetastore
+    image: local/hivemetastore
     environment:
         POSTGRES_DB: postgres
         POSTGRES_USER: postgres
@@ -13,16 +25,13 @@ services:
     volumes:
       - ./shared:/postgres/shared
     privileged: true
-  centos7-java8:
-    build:
-      context: ./centos7-java8
-      dockerfile: Dockerfile
-    volumes:
-      - ./shared:/root/shared
+
   hadoop:
     build:
       context: ./hadoop
       dockerfile: Dockerfile
+    container_name: hadoop
+    image: local/hadoop
     ports:
       - '8020:8020'
       - '8042:8042'
@@ -44,32 +53,5 @@ services:
       - '9083:9083'      
     depends_on:
       - centos7-java8
-      - postgres-metastore
-  # hadoop-hive-spark:
-  #   build:
-  #     context: ./hadoop-hive-spark
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - '8020:8020'
-  #     - '8042:8042'
-  #     - '8088:8088'
-  #     - '10020:10020'
-  #     - '19888:19888'
-  #     - '50010:50010'
-  #     - '50020:50020'
-  #     - '50070:50070'
-  #     - '50075:50075'
-  #     - '50090:50090'
-  #     - '9009:9009'
-  #     - '10000:10000'
-  #     - '10002:10002'
-  #     - '4040:4040'
-  #     - '7077:7077'
-  #     - '8080:8080'
-  #     - '8081:8081'      
-  #     - '9083:9083'      
-  #   depends_on:
-  #     - centos7-java8
-  #     - postgres-metastore
-
+      - hivemetastore
 

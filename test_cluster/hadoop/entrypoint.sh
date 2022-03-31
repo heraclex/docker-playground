@@ -105,6 +105,8 @@ else
     "$SPARK_HOME/sbin/start-all.sh"
     # TODO : fail to start worker, fix it
     spark-daemon.sh start org.apache.spark.deploy.worker.Worker 1 --webui-port 8081 spark://hadoop:7077
+    echo "Access Spark Master Url: http://127.0.0.1:8080/"
+    echo "Access Spark Worker Url: http://127.0.0.1:8081/"
 
     tail -f /dev/null ${HADOOP_LOG_DIR}/*
 
