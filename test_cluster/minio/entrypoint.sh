@@ -62,5 +62,5 @@ else
     touch "${MINIO_HOME}/dummy" 
     mc cp "${MINIO_HOME}/dummy" myminio/de-data-lake/hive/default/dummy
 
-    tail -f /dev/null "${MINIO_HOME}/dummy/*"
+    tail -f /dev/null
 fi

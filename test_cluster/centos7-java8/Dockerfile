@@ -11,7 +11,10 @@ ARG JAVA_RELEASE=JDK
 ENV JAVA_HOME=/usr
 
 # update all packages include curl
-RUN yum -y update
+RUN yum -y update && \
+    yum install -y telnet && \
+    yum install -y ca-certificates && \
+    yum install -y openssh-server openssh-clients tar which
 
 RUN set -euxo pipefail && \
     pkg="java-1.$JAVA_VERSION.0-openjdk" && \
@@ -21,12 +24,10 @@ RUN set -euxo pipefail && \
         pkg="$pkg-headless"; \
     fi; \
     yum install -y "$pkg" && \
-    yum install -y ca-certificates && \
     yum clean all && \
     rm -rf /var/cache/yum
 
-RUN set -euxo pipefail && \
-    yum install -y openssh-server openssh-clients tar which
+# RUN set -euxo pipefail && yum install -y openssh-server openssh-clients tar which
 
 COPY profile.d/java.sh /etc/profile.d/
 

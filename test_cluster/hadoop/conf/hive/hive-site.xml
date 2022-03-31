@@ -40,6 +40,18 @@
         <name>javax.jdo.option.ConnectionPassword</name>
         <value>hive</value>
     </property>
+    <property>
+        <name>datanucleus.autoCreateSchema</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>hive.metastore.uris</name>
+        <value>thrift://0.0.0.0:9083</value>
+    </property>
+    <property>
+        <name>hive.metastore.schema.verification</name>
+        <value>true</value>
+    </property>
 
     <!--    https://cwiki.apache.org/confluence/display/Hive/Hive+on+Spark%3A+Getting+Started -->
     <property>
@@ -61,3 +73,4 @@
         </description>
     </property>
 </configuration>
+

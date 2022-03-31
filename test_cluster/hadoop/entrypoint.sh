@@ -10,7 +10,7 @@ srcdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # echo "export JAVA_HOME=$JAVA_HOME"
 
 # Hadoop shell scripts assume USER is defined
-# export USER="${USER:-$(whoami)}"
+export USER="${USER:-$(whoami)}"
 
 # export PATH="$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin"
 # export PATH="$PATH:$HOME/downloads"
@@ -93,7 +93,7 @@ else
     echo "Start metastore service..."
     hive --service metastore &
     # JDBC Server.
-    hiveserver2 &
+    hiveserver2 --hiveconf hive.server2.enable.doAs=false
   
     # cd /hive/bin
     # ./hive --service metastore &

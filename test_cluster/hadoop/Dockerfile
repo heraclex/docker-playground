@@ -69,10 +69,14 @@ RUN curl --progress-bar -L --retry 3 \
 # For inscrutable reasons, Spark distribution doesn't include spark-hive.jar
 # Livy attempts to load it though, and will throw
 # java.lang.ClassNotFoundException: org.apache.spark.sql.hive.HiveContext
-ARG SCALA_VERSION=2.11
+ARG SCALA_VERSION=2.12
 RUN curl --progress-bar -L \
     "https://repo1.maven.org/maven2/org/apache/spark/spark-hive_${SCALA_VERSION}/${SPARK_VERSION}/spark-hive_${SCALA_VERSION}-${SPARK_VERSION}.jar" \
-    --output "${SPARK_HOME}/jars/spark-hive_${SCALA_VERSION}-${SPARK_VERSION}.jar"
+    --output "${SPARK_HOME}/jars/spark-hive_${SCALA_VERSION}-${SPARK_VERSION}.jar" && \
+    curl --progress-bar -L \
+    "https://repo1.maven.org/maven2/org/apache/spark/spark-hive-thriftserver_${SCALA_VERSION}/${SPARK_VERSION}/spark-hive-thriftserver_${SCALA_VERSION}-${SPARK_VERSION}.jar" \
+    --output "${SPARK_HOME}/jars/spark-hive-thriftserver_${SCALA_VERSION}-${SPARK_VERSION}.jar"
+
 
 RUN yum clean all && \
     rm -rf /var/cache/yum && \
