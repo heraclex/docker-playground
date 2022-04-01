@@ -12,9 +12,8 @@ ENV JAVA_HOME=/usr
 
 # update all packages include curl
 RUN yum -y update && \
-    yum install -y telnet && \
-    yum install -y ca-certificates && \
-    yum install -y openssh-server openssh-clients tar which
+    yum install -y telnet wget hostname ca-certificates \
+    openssh-server openssh-clients tar which net-tools 
 
 RUN set -euxo pipefail && \
     pkg="java-1.$JAVA_VERSION.0-openjdk" && \

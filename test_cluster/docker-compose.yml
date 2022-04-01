@@ -10,12 +10,12 @@ services:
     volumes:
       - ./shared:/root/shared
 
-  hivemetastore:
+  metastore:
     build:
       context: ./metastore
       dockerfile: Dockerfile
-    container_name: hivemetastore
-    image: local/hivemetastore
+    container_name: metastore
+    image: local/metastore
     environment:
         POSTGRES_DB: postgres
         POSTGRES_USER: postgres
@@ -26,34 +26,41 @@ services:
       - ./shared:/postgres/shared
     privileged: true
 
-  hadoop:
+  hive:
     build:
-      context: ./hadoop
+      context: ./hive
       dockerfile: Dockerfile
-    container_name: hadoop
-    image: local/hadoop
+    container_name: hive
+    image: local/hive
     ports:
-      - '8020:8020'
-      - '8042:8042'
-      - '8088:8088'
-      - '10020:10020'
-      - '19888:19888'
-      - '50010:50010'
-      - '50020:50020'
-      - '50070:50070'
-      - '50075:50075'
-      - '50090:50090'
-      # - '9009:9009'
-      - '10000:10000'
-      - '10002:10002'
-      - '4040:4040'
-      - '7077:7077'
-      - '8080:8080'
-      - '8081:8081'      
       - '9083:9083'      
     depends_on:
       - centos7-java8
-      - hivemetastore
+      - metastore
+
+  spark-master:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-master
+    # restart: unless-stopped
+    ports:
+      - 4040:4040
+      - 7077:7077
+      - 8080:8080
+      - 18080:18080 
+    command: sh spark-master.sh
+
+  spark-worker:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-worker
+    # restart: unless-stopped
+    ports:
+      # - "8081-8085:8081"
+      - 8081:8081
+    command: sh spark-worker.sh
 
   minio:
     build:

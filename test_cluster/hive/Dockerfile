@@ -1,8 +1,7 @@
 FROM local/centos7-java8:latest
 MAINTAINER Toan Le (https://www.linkedin.com/in/toanlee/)
 
-LABEL Description="Hadoop Dev", \
-      "Hadoop Version"="$HADOOP_VERSION"
+LABEL Description="Hadoop Dev"
 
 WORKDIR /
 
@@ -53,29 +52,10 @@ RUN curl --progress-bar -L \
     "https://jdbc.postgresql.org/download/postgresql-${POSTGRESSQL_VERSION}.jar" \
     --output ${HIVE_HOME}/lib/postgresql-jdbc.jar
 
+RUN curl -o delta-hive-assembly_2.11-0.2.0.jar https://github.com/delta-io/connectors/releases/download/v0.2.0/delta-hive-assembly_2.11-0.2.0.jar && \
+    cp delta-hive-assembly_2.11-0.2.0.jar ${HIVE_HOME}/lib/ && \
+    cp delta-hive-assembly_2.11-0.2.0.jar ${HADOOP_HOME}/share/hadoop/tools/lib/
 
-
-# Spark
-ARG SPARK_VERSION=3.2.1
-ARG SPARK_PACKAGE="spark-${SPARK_VERSION}-bin-without-hadoop"
-ENV SPARK_HOME /usr/spark
-ENV PATH="${PATH}:${SPARK_HOME}/sbin:${SPARK_HOME}/bin"
-RUN curl --progress-bar -L --retry 3 \
-  "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/${SPARK_PACKAGE}.tgz" \
-  | gunzip \
-  | tar x -C /usr/ \
- && mv "/usr/${SPARK_PACKAGE}" "${SPARK_HOME}" \
- && chown -R root:root "${SPARK_HOME}"
-# For inscrutable reasons, Spark distribution doesn't include spark-hive.jar
-# Livy attempts to load it though, and will throw
-# java.lang.ClassNotFoundException: org.apache.spark.sql.hive.HiveContext
-ARG SCALA_VERSION=2.12
-RUN curl --progress-bar -L \
-    "https://repo1.maven.org/maven2/org/apache/spark/spark-hive_${SCALA_VERSION}/${SPARK_VERSION}/spark-hive_${SCALA_VERSION}-${SPARK_VERSION}.jar" \
-    --output "${SPARK_HOME}/jars/spark-hive_${SCALA_VERSION}-${SPARK_VERSION}.jar" && \
-    curl --progress-bar -L \
-    "https://repo1.maven.org/maven2/org/apache/spark/spark-hive-thriftserver_${SCALA_VERSION}/${SPARK_VERSION}/spark-hive-thriftserver_${SCALA_VERSION}-${SPARK_VERSION}.jar" \
-    --output "${SPARK_HOME}/jars/spark-hive-thriftserver_${SCALA_VERSION}-${SPARK_VERSION}.jar"
 
 
 RUN yum clean all && \
@@ -100,6 +80,9 @@ ENV YARN_NODEMANAGER_USER="root"
 ENV LD_LIBRARY_PATH="${HADOOP_HOME}/lib/native:${LD_LIBRARY_PATH}"
 ENV HADOOP_CONF_DIR="${HADOOP_HOME}/etc/hadoop"
 ENV HADOOP_LOG_DIR="${HADOOP_HOME}/logs"
+# For S3 to work. Without this line you'll get "Class org.apache.hadoop.fs.s3a.S3AFileSystem not found" exception when accessing S3 from Hadoop
+ENV HADOOP_CLASSPATH="${HADOOP_HOME}/share/hadoop/tools/lib/*"
+
 COPY conf/hadoop/core-site.xml "${HADOOP_CONF_DIR}"
 COPY conf/hadoop/hadoop-env.sh "${HADOOP_CONF_DIR}"
 COPY conf/hadoop/hdfs-site.xml "${HADOOP_CONF_DIR}"
@@ -109,24 +92,25 @@ COPY conf/hadoop/yarn-site.xml "${HADOOP_CONF_DIR}"
 
 # Hive setup
 ENV HADOOP_CLASSPATH="${HADOOP_CLASSPATH}:${HIVE_HOME}/lib/*"
-COPY conf/hive/hive-site.xml "${HIVE_CONF_DIR}"
+COPY conf/hive/hive-site.xml ${HIVE_CONF_DIR}
+COPY conf/hive/metastore-site.xml ${HIVE_CONF_DIR}
 
-# Spark setup
-ENV SPARK_CONF_DIR="${SPARK_HOME}/conf"
-ENV SPARK_LOG_DIR="${SPARK_HOME}/logs"
-ENV SPARK_DIST_CLASSPATH="${HADOOP_CONF_DIR}:${HADOOP_HOME}/share/hadoop/tools/lib/*:${HADOOP_HOME}/share/hadoop/common/lib/*:${HADOOP_HOME}/share/hadoop/common/*:${HADOOP_HOME}/share/hadoop/hdfs:${HADOOP_HOME}/share/hadoop/hdfs/lib/*:${HADOOP_HOME}/share/hadoop/hdfs/*:${HADOOP_HOME}/share/hadoop/mapreduce/lib/*:${HADOOP_HOME}/share/hadoop/mapreduce/*:${HADOOP_HOME}/share/hadoop/yarn:${HADOOP_HOME}/share/hadoop/yarn/lib/*:${HADOOP_HOME}/share/hadoop/yarn/*"
-COPY conf/hadoop/core-site.xml "${SPARK_CONF_DIR}"/
-COPY conf/hadoop/hdfs-site.xml "${SPARK_CONF_DIR}"/
-COPY conf/hive/hive-site.xml "${HIVE_CONF_DIR}"
-COPY conf/spark/spark-defaults.conf "${SPARK_CONF_DIR}"/
+# # Spark setup
+# ENV SPARK_CONF_DIR="${SPARK_HOME}/conf"
+# ENV SPARK_LOG_DIR="${SPARK_HOME}/logs"
+# ENV SPARK_DIST_CLASSPATH="${HADOOP_CONF_DIR}:${HADOOP_HOME}/share/hadoop/tools/lib/*:${HADOOP_HOME}/share/hadoop/common/lib/*:${HADOOP_HOME}/share/hadoop/common/*:${HADOOP_HOME}/share/hadoop/hdfs:${HADOOP_HOME}/share/hadoop/hdfs/lib/*:${HADOOP_HOME}/share/hadoop/hdfs/*:${HADOOP_HOME}/share/hadoop/mapreduce/lib/*:${HADOOP_HOME}/share/hadoop/mapreduce/*:${HADOOP_HOME}/share/hadoop/yarn:${HADOOP_HOME}/share/hadoop/yarn/lib/*:${HADOOP_HOME}/share/hadoop/yarn/*"
+# COPY conf/hadoop/core-site.xml "${SPARK_CONF_DIR}"/
+# COPY conf/hadoop/hdfs-site.xml "${SPARK_CONF_DIR}"/
+# COPY conf/hive/hive-site.xml "${HIVE_CONF_DIR}"
+# COPY conf/spark/spark-defaults.conf "${SPARK_CONF_DIR}"/
 
-# Spark with Hive
-# TODO enable in Spark 3.0
-ENV SPARK_DIST_CLASSPATH="${SPARK_DIST_CLASSPATH}:${HIVE_HOME}/lib/*"
-COPY conf/hive/hive-site.xml "${SPARK_CONF_DIR}/"
-RUN ln -s "${SPARK_HOME}/jars/scala-library-*.jar" "${HIVE_HOME}/lib" \
-   && ln -s "${SPARK_HOME}/jars/spark-core_*.jar" "${HIVE_HOME}/lib" \
-   && ln -s "${SPARK_HOME}/jars/spark-network-common_*.jar" "${HIVE_HOME}/lib"
+# # Spark with Hive
+# # TODO enable in Spark 3.0
+# ENV SPARK_DIST_CLASSPATH="${SPARK_DIST_CLASSPATH}:${HIVE_HOME}/lib/*"
+# COPY conf/hive/hive-site.xml "${SPARK_CONF_DIR}/"
+# RUN ln -s "${SPARK_HOME}/jars/scala-library-*.jar" "${HIVE_HOME}/lib" \
+#    && ln -s "${SPARK_HOME}/jars/spark-core_*.jar" "${HIVE_HOME}/lib" \
+#    && ln -s "${SPARK_HOME}/jars/spark-network-common_*.jar" "${HIVE_HOME}/lib"
 
 # Clean up
 RUN rm -rf "${HIVE_HOME}/examples" \
@@ -138,7 +122,7 @@ HEALTHCHECK CMD curl -f http://host.docker.internal:8080/ \
 
 
 COPY ssh/config /root/.ssh/
-EXPOSE 8020 8042 8088 9000 10020 19888 50010 50020 50070 50075 50090 10000 10002 4040 7077 8080 8081
+EXPOSE 9083
 
 
 # Entry point: start all services and applications.

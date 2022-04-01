@@ -12,15 +12,6 @@ srcdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Hadoop shell scripts assume USER is defined
 export USER="${USER:-$(whoami)}"
 
-# export PATH="$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin"
-# export PATH="$PATH:$HOME/downloads"
-
-# export HDFS_NAMENODE_USER="root"
-# export HDFS_DATANODE_USER="root"
-# export HDFS_DATANODE_SECURE_USER="root"
-# export HDFS_SECONDARYNAMENODE_USER="root"
-# export YARN_RESOURCEMANAGER_USER="root"
-# export YARN_NODEMANAGER_USER="root"
 
 
 if [ $# -gt 0 ]; then
@@ -80,36 +71,34 @@ else
     # touch "${MINIO_HOME}/dummy" 
     # mc cp "${MINIO_HOME}/dummy" myminio/de-data-lake/hive/default/dummy
 
-    # start hadoop
-    start-dfs.sh
-    start-yarn.sh
+    # # start hadoop
+    # start-dfs.sh
+    # start-yarn.sh
     
     # fixing error java.lang.NoSuchMethodError com.google.common.base.Preconditions.checkArgument
     # https://issues.apache.org/jira/browse/HIVE-22915?page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel&focusedCommentId=17196051#comment-17196051
     echo "Replacing guava "
-    rm "${HIVE_HOME}/lib/guava-19.0.jar"
-    cp "${HADOOP_HOME}/share/hadoop/hdfs/lib/guava-27.0-jre.jar" "${HIVE_HOME}/lib/"
+    rm -f $HIVE_HOME/lib/guava-*.jar && cp $HADOOP_HOME/share/hadoop/hdfs/lib/guava-*.jar $HIVE_HOME/lib/
     
-    echo "Start metastore service..."
-    hive --service metastore &
+    
+    # // only need hive metastore
+    echo "Start hive metastore service..."
+    start-metastore
+    # hive --service metastore &
     # JDBC Server.
-    hiveserver2 --hiveconf hive.server2.enable.doAs=false
+    # echo "Start hiveserver2 service..."
+    # hiveserver2 &
   
-    # cd /hive/bin
-    # ./hive --service metastore &
-    # ./hiveserver2 --hiveconf hive.server2.enable.doAs=false &
-    # cd /
-
-     # start spark-standalone
-     echo "Start Spark Engine..."
-    "$SPARK_HOME/sbin/start-all.sh"
-    # TODO : fail to start worker, fix it
-    spark-daemon.sh start org.apache.spark.deploy.worker.Worker 1 --webui-port 8081 spark://hadoop:7077
-    echo "Access Spark Master Url: http://127.0.0.1:8080/"
-    echo "Access Spark Worker Url: http://127.0.0.1:8081/"
+    #  # start spark-standalone
+    #  echo "Start Spark Engine..."
+    # "$SPARK_HOME/sbin/start-all.sh"
+    # # TODO : fail to start worker, fix it
+    # spark-daemon.sh start org.apache.spark.deploy.worker.Worker 1 --webui-port 8081 spark://hadoop:7077
+    # echo "Access Spark Master Url: http://127.0.0.1:8080/"
+    # echo "Access Spark Worker Url: http://127.0.0.1:8081/"
 
     tail -f /dev/null ${HADOOP_LOG_DIR}/*
 
-    stop-yarn.sh
-    stop-dfs.sh
+    # stop-yarn.sh
+    # stop-dfs.sh
 fi
