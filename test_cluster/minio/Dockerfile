@@ -22,11 +22,11 @@ RUN mkdir ${MINIO_HOME} && \
     chmod +x ${MINIO_HOME}/mc
 
 # minio setup
-COPY conf/minio-config.json /root/.mc/config.json
+# COPY conf/minio-config.json /root/.mc/config.json
 
-EXPOSE 9009
+EXPOSE 9000 9001
 
-COPY ssh/config /root/.ssh/
+# COPY ssh/config /root/.ssh/
 # Entry point: start all services and applications.
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh

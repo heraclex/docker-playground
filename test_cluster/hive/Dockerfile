@@ -1,17 +1,12 @@
+# FROM openjdk:8-jre
 FROM local/centos7-java8:latest
-MAINTAINER Toan Le (https://www.linkedin.com/in/toanlee/)
 
-LABEL Description="Hadoop Dev"
+LABEL Description="Hive metastore standalone"
 
 WORKDIR /
 
-# https://github.com/hadolint/hadolint/wiki/DL4006
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
-################################ Package setup ################################
-
 # Hadoop
-ARG HADOOP_VERSION=3.2.1
+ARG HADOOP_VERSION=3.2.0
 ENV HADOOP_HOME /usr/hadoop
 ENV PATH="${PATH}:${HADOOP_HOME}/sbin:${HADOOP_HOME}/bin"
 RUN curl --progress-bar -L --retry 3 \
@@ -20,112 +15,78 @@ RUN curl --progress-bar -L --retry 3 \
     | tar -x -C /usr/ && \
     mv "/usr/hadoop-${HADOOP_VERSION}" "${HADOOP_HOME}" && \
     rm -rf "${HADOOP_HOME}/share/doc" && \
-    chown -R root:root "${HADOOP_HOME}" && \
-    "${HADOOP_HOME}/bin/hdfs" namenode -format && \
-    yum install -y hostname && \
-    yum install -y net-tools 
-
-RUN mkdir -pv "${HADOOP_HOME}/tmp" && \
-    mkdir -pv "${HADOOP_HOME}/dfs/name" && \
-    mkdir -pv "${HADOOP_HOME}/dfs/data"
+    chown -R root:root "${HADOOP_HOME}"
 
 
 # Hive
-ARG POSTGRESSQL_VERSION=42.3.3
-ARG HIVE_VERSION=3.1.2
-ENV HIVE_HOME /usr/hive
-ENV HIVE_CONF_DIR="${HIVE_HOME}/conf"
+ARG METASTORE_VERSION=3.0.0
+ENV HIVE_HOME /usr/hive-metastore
 ENV PATH "${PATH}:${HIVE_HOME}/bin"
-RUN curl --progress-bar -L \
-    "https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz" \
-      | gunzip \
-      | tar -x -C /usr/ && \
-    mv "/usr/apache-hive-${HIVE_VERSION}-bin" "${HIVE_HOME}" && \
-    chown -R root:root "${HIVE_HOME}" && \
-    mkdir -p "${HIVE_HOME}/hcatalog/var/log" && \
-    mkdir -p "${HIVE_HOME}/var/log" && \
-    mkdir -p "${HIVE_CONF_DIR}" && \
-    chmod 777 "${HIVE_HOME}/hcatalog/var/log" && \
-    chmod 777 "${HIVE_HOME}/var/log"
+RUN curl --progress-bar -L --retry 3 \
+    "https://archive.apache.org/dist/hive/hive-standalone-metastore-${METASTORE_VERSION}/hive-standalone-metastore-${METASTORE_VERSION}-bin.tar.gz" \
+    | gunzip \
+    | tar -x -C /usr/ && \
+    mv "/usr/apache-hive-metastore-${METASTORE_VERSION}-bin" "${HIVE_HOME}" && \
+    chown -R root:root "${HIVE_HOME}"
 
-RUN curl --progress-bar -L \
-    "https://jdbc.postgresql.org/download/postgresql-${POSTGRESSQL_VERSION}.jar" \
+ARG POSTGRESSQL_VERSION=42.3.3
+RUN curl --progress-bar -L https://jdbc.postgresql.org/download/postgresql-${POSTGRESSQL_VERSION}.jar \
     --output ${HIVE_HOME}/lib/postgresql-jdbc.jar
 
+# download delta-hive-assembly
 RUN curl -o delta-hive-assembly_2.11-0.2.0.jar https://github.com/delta-io/connectors/releases/download/v0.2.0/delta-hive-assembly_2.11-0.2.0.jar && \
     cp delta-hive-assembly_2.11-0.2.0.jar ${HIVE_HOME}/lib/ && \
     cp delta-hive-assembly_2.11-0.2.0.jar ${HADOOP_HOME}/share/hadoop/tools/lib/
 
+# download aws-java-sdk
+RUN curl -o aws-java-sdk-1.11.534.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/1.11.534/aws-java-sdk-1.11.534.jar && \
+    cp aws-java-sdk-1.11.534.jar ${HIVE_HOME}/lib/ && \
+    cp aws-java-sdk-1.11.534.jar ${HADOOP_HOME}/share/hadoop/tools/lib/ && \
+    cp ${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-*.jar ${HIVE_HOME}/lib/
 
+ENV HADOOP_CLASSPATH=${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-1.11.375.jar:${HADOOP_HOME}/share/hadoop/tools/lib/hadoop-aws-3.2.0.jar:${HADOOP_HOME}/share/hadoop/tools/lib/delta-hive-assembly_2.11-0.2.0.jar
 
-RUN yum clean all && \
-    rm -rf /var/cache/yum && \
-    mkdir /root/.ssh && \
-    chmod 0700 /root/.ssh
-
-
-
-################################ ENV setup ################################
-
-# Common settings
-# ENV JAVA_HOME "/usr/lib/jvm/java-1.8-openjdk"
-ENV PATH="${PATH}:${JAVA_HOME}/bin"
-
-# Hadoop setup
-ENV HDFS_NAMENODE_USER="root"
-ENV HDFS_DATANODE_USER="root"
-ENV HDFS_SECONDARYNAMENODE_USER="root"
-ENV YARN_RESOURCEMANAGER_USER="root"
-ENV YARN_NODEMANAGER_USER="root"
-ENV LD_LIBRARY_PATH="${HADOOP_HOME}/lib/native:${LD_LIBRARY_PATH}"
-ENV HADOOP_CONF_DIR="${HADOOP_HOME}/etc/hadoop"
-ENV HADOOP_LOG_DIR="${HADOOP_HOME}/logs"
-# For S3 to work. Without this line you'll get "Class org.apache.hadoop.fs.s3a.S3AFileSystem not found" exception when accessing S3 from Hadoop
-ENV HADOOP_CLASSPATH="${HADOOP_HOME}/share/hadoop/tools/lib/*"
-
-COPY conf/hadoop/core-site.xml "${HADOOP_CONF_DIR}"
-COPY conf/hadoop/hadoop-env.sh "${HADOOP_CONF_DIR}"
-COPY conf/hadoop/hdfs-site.xml "${HADOOP_CONF_DIR}"
-COPY conf/hadoop/mapred-site.xml "${HADOOP_CONF_DIR}"
-COPY conf/hadoop/workers "${HADOOP_CONF_DIR}"
-COPY conf/hadoop/yarn-site.xml "${HADOOP_CONF_DIR}"
-
-# Hive setup
-ENV HADOOP_CLASSPATH="${HADOOP_CLASSPATH}:${HIVE_HOME}/lib/*"
-COPY conf/hive/hive-site.xml ${HIVE_CONF_DIR}
-COPY conf/hive/metastore-site.xml ${HIVE_CONF_DIR}
-
-# # Spark setup
-# ENV SPARK_CONF_DIR="${SPARK_HOME}/conf"
-# ENV SPARK_LOG_DIR="${SPARK_HOME}/logs"
-# ENV SPARK_DIST_CLASSPATH="${HADOOP_CONF_DIR}:${HADOOP_HOME}/share/hadoop/tools/lib/*:${HADOOP_HOME}/share/hadoop/common/lib/*:${HADOOP_HOME}/share/hadoop/common/*:${HADOOP_HOME}/share/hadoop/hdfs:${HADOOP_HOME}/share/hadoop/hdfs/lib/*:${HADOOP_HOME}/share/hadoop/hdfs/*:${HADOOP_HOME}/share/hadoop/mapreduce/lib/*:${HADOOP_HOME}/share/hadoop/mapreduce/*:${HADOOP_HOME}/share/hadoop/yarn:${HADOOP_HOME}/share/hadoop/yarn/lib/*:${HADOOP_HOME}/share/hadoop/yarn/*"
-# COPY conf/hadoop/core-site.xml "${SPARK_CONF_DIR}"/
-# COPY conf/hadoop/hdfs-site.xml "${SPARK_CONF_DIR}"/
-# COPY conf/hive/hive-site.xml "${HIVE_CONF_DIR}"
-# COPY conf/spark/spark-defaults.conf "${SPARK_CONF_DIR}"/
-
-# # Spark with Hive
-# # TODO enable in Spark 3.0
-# ENV SPARK_DIST_CLASSPATH="${SPARK_DIST_CLASSPATH}:${HIVE_HOME}/lib/*"
-# COPY conf/hive/hive-site.xml "${SPARK_CONF_DIR}/"
-# RUN ln -s "${SPARK_HOME}/jars/scala-library-*.jar" "${HIVE_HOME}/lib" \
-#    && ln -s "${SPARK_HOME}/jars/spark-core_*.jar" "${HIVE_HOME}/lib" \
-#    && ln -s "${SPARK_HOME}/jars/spark-network-common_*.jar" "${HIVE_HOME}/lib"
-
-# Clean up
-RUN rm -rf "${HIVE_HOME}/examples" \
-    && rm -rf "${SPARK_HOME}/examples/src"
-
-# If both YARN Web UI and Spark UI is up, then returns 0, 1 otherwise.
-HEALTHCHECK CMD curl -f http://host.docker.internal:8080/ \
-    && curl -f http://host.docker.internal:8088/ || exit 1
-
-
-COPY ssh/config /root/.ssh/
 EXPOSE 9083
 
-
 # Entry point: start all services and applications.
-COPY entrypoint.sh /
+COPY metastore-site.xml ${HIVE_HOME}/conf
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
+
+# ENV HADOOP_VERSION=3.2.1
+# ENV METASTORE_VERSION=3.0.0
+
+# ENV HADOOP_HOME=/opt/hadoop-${HADOOP_VERSION}
+# ENV HIVE_HOME=/opt/apache-hive-metastore-${METASTORE_VERSION}-bin
+
+# RUN curl -L https://archive.apache.org/dist/hive/hive-standalone-metastore-${METASTORE_VERSION}/hive-standalone-metastore-${METASTORE_VERSION}-bin.tar.gz | tar zxf - && \
+#     curl -L https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz | tar zxf -
+
+# RUN curl -o mysql-connector-java-8.0.19.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.19/mysql-connector-java-8.0.19.jar && \
+#     cp mysql-connector-java-8.0.19.jar ${HIVE_HOME}/lib/ && \
+#     curl -o delta-hive-assembly_2.11-0.2.0.jar https://github.com/delta-io/connectors/releases/download/v0.2.0/delta-hive-assembly_2.11-0.2.0.jar && \
+#     cp delta-hive-assembly_2.11-0.2.0.jar ${HIVE_HOME}/lib/ && \
+#     cp delta-hive-assembly_2.11-0.2.0.jar ${HADOOP_HOME}/share/hadoop/tools/lib/ && \
+#     curl -o aws-java-sdk-1.11.534.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/1.11.534/aws-java-sdk-1.11.534.jar && \
+#     cp aws-java-sdk-1.11.534.jar ${HIVE_HOME}/lib/ && \
+#     cp aws-java-sdk-1.11.534.jar ${HADOOP_HOME}/share/hadoop/tools/lib/ && \
+#     cp ${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-1.11.375.jar ${HIVE_HOME}/lib/
+
+# COPY metastore-site.xml ${HIVE_HOME}/conf
+# COPY entrypoint.sh /entrypoint.sh
+# # COPY core-site.xml ${HADOOP_HOME}/etc/hadoop/
+
+# RUN groupadd -r hive --gid=1000 && \
+#     useradd -r -g hive --uid=1000 -d ${HIVE_HOME} hive && \
+#     chown hive:hive -R ${HIVE_HOME} && \
+#     chown hive:hive /entrypoint.sh && chmod +x /entrypoint.sh
+
+# ENV HADOOP_CLASSPATH=${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-1.11.375.jar:${HADOOP_HOME}/share/hadoop/tools/lib/hadoop-aws-3.2.0.jar:${HADOOP_HOME}/share/hadoop/tools/lib/delta-hive-assembly_2.11-0.2.0.jar
+# ENV JAVA_HOME=/usr/local/openjdk-8
+
+
+# USER hive
+# EXPOSE 9083
+
+# ENTRYPOINT ["sh", "-c", "/entrypoint.sh"]
