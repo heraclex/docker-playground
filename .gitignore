@@ -1,4 +1,4 @@
 *.class
 *.log
 
-test_cluster/shared/*
+test_cluster/.storage/*
