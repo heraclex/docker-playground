@@ -6,6 +6,6 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
  CREATE DATABASE shopback;
  GRANT ALL PRIVILEGES ON DATABASE shopback TO shopback;
  \c shopback
- \i /hive/datastore.sql
+ \i /datastore.sql
 EOSQL
 

@@ -23,15 +23,15 @@
     </property>
     <property>
         <name>javax.jdo.option.ConnectionURL</name>
-        <value>jdbc:postgresql://metastore:5432/metastore</value>
+        <value>jdbc:postgresql://metastore:5432/metastoredb</value>
     </property>
     <property>
         <name>javax.jdo.option.ConnectionUserName</name>
-        <value>hive</value>
+        <value>postgres</value>
     </property>
     <property>
         <name>javax.jdo.option.ConnectionPassword</name>
-        <value>hive</value>
+        <value>postgres</value>
     </property>
 
     <!-- Minio properties -->
@@ -42,7 +42,7 @@
 
     <property>
         <name>fs.s3a.endpoint</name>
-        <value>http://minio:9009</value>
+        <value>http://minio:9000</value>
     </property>
 
     <property>

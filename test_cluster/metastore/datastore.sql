@@ -9,7 +9,7 @@ create table jobs
     data_refreshed_at        varchar(100)
 );
 
-ALTER TABLE public.jobs owner TO shopback;
+ALTER TABLE public.jobs owner TO ;
 GRANT SELECT,INSERT ON TABLE public.jobs TO shopback;
 
 create table job_runs
