@@ -3,12 +3,10 @@ set -e
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
  CREATE USER hive WITH PASSWORD 'hive';
- CREATE DATABASE metastore;
- GRANT ALL PRIVILEGES ON DATABASE metastore TO hive;
+ CREATE DATABASE metastoredb;
+ GRANT ALL PRIVILEGES ON DATABASE metastoredb TO hive;
 
- \c metastore
-
- 
+ \c metastoredb
 
  \pset tuples_only
  \o /tmp/grant-privs

@@ -41,13 +41,15 @@ RUN curl --progress-bar -L https://jdbc.postgresql.org/download/postgresql-${POS
 # download delta-hive-assembly
 RUN curl -o delta-hive-assembly_2.11-0.2.0.jar https://github.com/delta-io/connectors/releases/download/v0.2.0/delta-hive-assembly_2.11-0.2.0.jar && \
     cp delta-hive-assembly_2.11-0.2.0.jar ${HIVE_HOME}/lib/ && \
-    cp delta-hive-assembly_2.11-0.2.0.jar ${HADOOP_HOME}/share/hadoop/tools/lib/
+    cp delta-hive-assembly_2.11-0.2.0.jar ${HADOOP_HOME}/share/hadoop/tools/lib/ && \
+    rm -f delta-hive-assembly_2.11-0.2.0.jar
 
 # download aws-java-sdk
 RUN curl -o aws-java-sdk-1.11.534.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/1.11.534/aws-java-sdk-1.11.534.jar && \
     cp aws-java-sdk-1.11.534.jar ${HIVE_HOME}/lib/ && \
     cp aws-java-sdk-1.11.534.jar ${HADOOP_HOME}/share/hadoop/tools/lib/ && \
-    cp ${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-*.jar ${HIVE_HOME}/lib/
+    cp ${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-*.jar ${HIVE_HOME}/lib/ && \
+    rm -f aws-java-sdk-1.11.534.jar
 
 ENV HADOOP_CLASSPATH=${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-1.11.375.jar:${HADOOP_HOME}/share/hadoop/tools/lib/hadoop-aws-3.2.0.jar:${HADOOP_HOME}/share/hadoop/tools/lib/delta-hive-assembly_2.11-0.2.0.jar
 

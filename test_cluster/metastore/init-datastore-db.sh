@@ -2,10 +2,10 @@
 set -e
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
- CREATE USER shopback WITH PASSWORD 'shopback';
- CREATE DATABASE shopback;
- GRANT ALL PRIVILEGES ON DATABASE shopback TO shopback;
- \c shopback
+ CREATE USER sparkapp WITH PASSWORD 'sparkapp';
+ CREATE DATABASE sparkapp;
+ GRANT ALL PRIVILEGES ON DATABASE sparkapp TO sparkapp;
+ \c sparkapp
  \i /datastore.sql
 EOSQL
 

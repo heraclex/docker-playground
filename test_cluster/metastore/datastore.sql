@@ -9,8 +9,8 @@ create table jobs
     data_refreshed_at        varchar(100)
 );
 
-ALTER TABLE public.jobs owner TO ;
-GRANT SELECT,INSERT ON TABLE public.jobs TO shopback;
+ALTER TABLE public.jobs owner TO sparkapp;
+GRANT SELECT,INSERT ON TABLE public.jobs TO sparkapp;
 
 create table job_runs
 (
@@ -24,8 +24,8 @@ create table job_runs
     delta_read_end_time varchar(5000)
 );
 
-ALTER TABLE public.job_runs owner TO shopback;
-GRANT SELECT,INSERT ON TABLE public.job_runs TO shopback;
+ALTER TABLE public.job_runs owner TO sparkapp;
+GRANT SELECT,INSERT ON TABLE public.job_runs TO sparkapp;
 
 create table partition_refreshes
 (
@@ -38,5 +38,5 @@ create table partition_refreshes
     version              bigint
 );
 
-ALTER TABLE public.partition_refreshes owner TO shopback;
-GRANT SELECT,INSERT ON TABLE public.partition_refreshes TO shopback;
+ALTER TABLE public.partition_refreshes owner TO sparkapp;
+GRANT SELECT,INSERT ON TABLE public.partition_refreshes TO sparkapp;

@@ -7,7 +7,7 @@ FROM postgres:13
 # CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
 
 # ADD hive-schema-3.1.0.postgres.sql /hive/hive-schema-3.1.0.postgres.sql
-# ADD init-hive-db.sh /docker-entrypoint-initdb.d/init-hive-db.sh
+ADD init-metastore-db.sh /docker-entrypoint-initdb.d/init-metastore-db.sh
 
 ADD datastore.sql /datastore.sql
 ADD init-datastore-db.sh /docker-entrypoint-initdb.d/init-datastore-db.sh

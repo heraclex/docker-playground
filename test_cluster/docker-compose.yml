@@ -8,7 +8,7 @@ services:
     image: local/centos7-java8
     container_name: centos7-java8
     volumes:
-      - ./shared:/root/shared
+      - ./.shared:/root/shared
 
   metastore:
     build:
@@ -17,7 +17,6 @@ services:
     container_name: metastore
     image: local/metastore
     environment:
-        POSTGRES_DB: metastoredb
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: postgres
     ports:
@@ -37,6 +36,7 @@ services:
     depends_on:
       - centos7-java8
       - metastore
+      - minio
 
   spark-master:
     build:
@@ -74,12 +74,12 @@ services:
     ports:
       - '9000:9000'
       - "9001:9001"
+    volumes:
+      - ./.storage/minio:/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://minio:9000/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3
-    volumes:
-      - ./.storage/minio:/data
     depends_on:
       - centos7-java8
