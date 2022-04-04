@@ -38,30 +38,6 @@ services:
       - metastore
       - minio
 
-  spark-master:
-    build:
-      context: ./spark
-      dockerfile: Dockerfile
-    container_name: spark-master
-    # restart: unless-stopped
-    ports:
-      - 4040:4040
-      - 7077:7077
-      - 8080:8080
-      - 18080:18080 
-    command: sh spark-master.sh
-
-  spark-worker:
-    build:
-      context: ./spark
-      dockerfile: Dockerfile
-    container_name: spark-worker
-    # restart: unless-stopped
-    ports:
-      # - "8081-8085:8081"
-      - 8081:8081
-    command: sh spark-worker.sh
-
   minio:
     build:
       context: ./minio
@@ -83,3 +59,51 @@ services:
       retries: 3
     depends_on:
       - centos7-java8
+  
+  spark-master:
+    container_name: spark-master
+    image: local/spark-master
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    # restart: unless-stopped
+    ports:
+      - 4040:4040
+      - 7077:7077
+      - 8080:8080
+      - 18080:18080 
+    command: sh spark-master.sh
+
+  spark-worker:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-worker
+    image: local/spark-worker
+    # restart: unless-stopped
+    ports:
+      # - "8081-8085:8081"
+      - 8081:8081
+    command: sh spark-worker.sh
+
+  trino-coordinator:
+    container_name: trino-coordinator
+    image: local/trino-coordinator
+    build:
+      context: ./trino
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./trino/coordinator_config.properties:/usr/trino/etc/config.properties
+      - ./trino/etc/catalog:/usr/trino/etc/catalog
+
+  trino-worker:
+    container_name: trino-worker
+    image: local/trino-worker
+    build:
+      context: ./trino
+      dockerfile: Dockerfile
+    volumes:
+      - ./trino/worker_config.properties:/usr/trino/etc/config.properties
+      - ./trino/etc/catalog:/usr/trino/etc/catalog
