@@ -6,7 +6,7 @@ LABEL Description="Hive metastore standalone"
 WORKDIR /
 
 # Hadoop
-ARG HADOOP_VERSION=3.3.1
+ARG HADOOP_VERSION=3.2.0
 ENV HADOOP_HOME /usr/hadoop
 ENV PATH="${PATH}:${HADOOP_HOME}/sbin:${HADOOP_HOME}/bin"
 RUN curl --progress-bar -L --retry 3 \
@@ -19,7 +19,7 @@ RUN curl --progress-bar -L --retry 3 \
 
 
 # Hive
-ARG METASTORE_VERSION=3.1.2
+ARG METASTORE_VERSION=3.0.0
 ENV HIVE_HOME /usr/hive-standalone-metastore
 ENV PATH "${PATH}:${HIVE_HOME}/bin"
 RUN curl --progress-bar -L --retry 3 \
@@ -48,7 +48,7 @@ RUN curl -o $DELTA_HIVE_ASSEMBLY "https://github.com/delta-io/connectors/release
     rm -f $DELTA_HIVE_ASSEMBLY
 
 # download aws-java-sdk
-ARG AWS_JAVA_SDK_VERSION=1.11.901
+ARG AWS_JAVA_SDK_VERSION=1.11.534
 ARG AWS_JAVA_SDK="aws-java-sdk-${AWS_JAVA_SDK_VERSION}.jar"
 RUN curl -o $AWS_JAVA_SDK "https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/$AWS_JAVA_SDK_VERSION/$AWS_JAVA_SDK" && \
     cp $AWS_JAVA_SDK ${HIVE_HOME}/lib/ && \
