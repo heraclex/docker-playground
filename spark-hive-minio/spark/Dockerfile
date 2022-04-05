@@ -1,4 +1,4 @@
-FROM local/centos7-java8:latest
+FROM local/centos7:latest
 MAINTAINER Toan Le (https://www.linkedin.com/in/toanlee/)
 
 LABEL Description="Spark Dev"

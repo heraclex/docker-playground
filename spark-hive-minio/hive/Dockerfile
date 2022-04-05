@@ -1,5 +1,5 @@
-# FROM openjdk:8-jre
-FROM local/centos7-java8:latest
+
+FROM local/centos8:latest
 
 LABEL Description="Hive metastore standalone"
 

@@ -1,12 +1,20 @@
 version: '3.1'
 services:
 
-  centos7-java8:
+  centos7:
     build:
-      context: ./centos7-java8
+      context: ./centos7
       dockerfile: Dockerfile
-    image: local/centos7-java8
-    container_name: centos7-java8
+    image: local/centos7
+    container_name: centos7
+    volumes:
+      - ./.shared:/root/shared
+  centos8:
+    build:
+      context: ./centos8
+      dockerfile: Dockerfile
+    image: local/centos8
+    container_name: centos8
     volumes:
       - ./.shared:/root/shared
 
@@ -34,7 +42,6 @@ services:
     ports:
       - '9083:9083'      
     depends_on:
-      - centos7-java8
       - metastore
       - minio
 
@@ -57,12 +64,10 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
-    depends_on:
-      - centos7-java8
   
   spark-master:
     container_name: spark-master
-    image: local/spark-master
+    image: local/spark
     build:
       context: ./spark
       dockerfile: Dockerfile
@@ -79,7 +84,7 @@ services:
       context: ./spark
       dockerfile: Dockerfile
     container_name: spark-worker
-    image: local/spark-worker
+    image: local/spark
     # restart: unless-stopped
     ports:
       # - "8081-8085:8081"
@@ -88,7 +93,7 @@ services:
 
   trino-coordinator:
     container_name: trino-coordinator
-    image: local/trino-coordinator
+    image: local/trino
     build:
       context: ./trino
       dockerfile: Dockerfile
@@ -100,7 +105,7 @@ services:
 
   trino-worker:
     container_name: trino-worker
-    image: local/trino-worker
+    image: local/trino
     build:
       context: ./trino
       dockerfile: Dockerfile
