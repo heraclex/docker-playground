@@ -39,8 +39,8 @@ RUN curl --progress-bar -L https://jdbc.postgresql.org/download/postgresql-${POS
     
 
 # download delta-hive-assembly
-ARG SCALA_VERSION=2.11
-ARG DELTA_HIVE_VERSION=0.2.0
+ARG SCALA_VERSION=2.13
+ARG DELTA_HIVE_VERSION=1.1.0
 ARG DELTA_HIVE_ASSEMBLY="delta-hive-assembly_$SCALA_VERSION-${DELTA_HIVE_VERSION}.jar"
 RUN curl -o $DELTA_HIVE_ASSEMBLY "https://github.com/delta-io/connectors/releases/download/v$DELTA_HIVE_VERSION/$DELTA_HIVE_ASSEMBLY" && \
     cp $DELTA_HIVE_ASSEMBLY ${HIVE_HOME}/lib/ && \

@@ -65,6 +65,19 @@ services:
       timeout: 20s
       retries: 3
   
+  superset:
+    image: arezamoosavi/superset:latest
+    container_name: superset
+    environment:
+      ADMIN_USERNAME: admin
+      ADMIN_PWD: admin
+    ports:
+      - 8088:8088
+    volumes:
+      - ./.storage/superset:/superset
+    restart: unless-stopped
+    command: bash -c "pip install sqlalchemy-trino && pip install trino"
+  
   spark-master:
     container_name: spark-master
     image: local/spark
