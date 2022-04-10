@@ -11,7 +11,7 @@ RUN yum install -y zulu11-jdk
 
 WORKDIR /
 
-ARG TRINO_VERSION=370
+ARG TRINO_VERSION=375
 ARG TRINO_SERVER_PKG="trino-server-${TRINO_VERSION}.tar.gz"
 ARG TRINO_CLIENT_PKG="trino-cli-${TRINO_VERSION}-executable.jar"
 ARG TRINO_SERVER_URL="https://repo1.maven.org/maven2/io/trino/trino-server/${TRINO_VERSION}/${TRINO_SERVER_PKG}"

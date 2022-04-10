@@ -40,12 +40,14 @@ RUN curl --progress-bar -L https://jdbc.postgresql.org/download/postgresql-${POS
 
 # download delta-hive-assembly
 ARG SCALA_VERSION=2.13
-ARG DELTA_HIVE_VERSION=1.1.0
+ARG DELTA_HIVE_VERSION=0.4.0
 ARG DELTA_HIVE_ASSEMBLY="delta-hive-assembly_$SCALA_VERSION-${DELTA_HIVE_VERSION}.jar"
-RUN curl -o $DELTA_HIVE_ASSEMBLY "https://github.com/delta-io/connectors/releases/download/v$DELTA_HIVE_VERSION/$DELTA_HIVE_ASSEMBLY" && \
+RUN curl -o $DELTA_HIVE_ASSEMBLY "https://repo1.maven.org/maven2/io/delta/delta-hive_$SCALA_VERSION/$DELTA_HIVE_ASSEMBLY" && \
     cp $DELTA_HIVE_ASSEMBLY ${HIVE_HOME}/lib/ && \
     cp $DELTA_HIVE_ASSEMBLY ${HADOOP_HOME}/share/hadoop/tools/lib/ && \
     rm -f $DELTA_HIVE_ASSEMBLY
+ENV HIVE_AUX_JARS_PATH=${HIVE_HOME}/lib/$DELTA_HIVE_ASSEMBLY
+
 
 # download aws-java-sdk
 ARG AWS_JAVA_SDK_VERSION=1.11.534
