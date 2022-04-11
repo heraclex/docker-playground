@@ -32,6 +32,7 @@ RUN curl --progress-bar -L \
     "https://repo1.maven.org/maven2/org/apache/spark/spark-hive-thriftserver_${SCALA_VERSION}/${SPARK_VERSION}/spark-hive-thriftserver_${SCALA_VERSION}-${SPARK_VERSION}.jar" \
     --output "${SPARK_HOME}/jars/spark-hive-thriftserver_${SCALA_VERSION}-${SPARK_VERSION}.jar"
 
+# TODO: need to refactor it later
 RUN cd "${SPARK_HOME}/jars" && \
     wget --no-verbose https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/1.11.534/aws-java-sdk-1.11.534.jar && \
     wget --no-verbose https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.874/aws-java-sdk-bundle-1.11.874.jar && \
