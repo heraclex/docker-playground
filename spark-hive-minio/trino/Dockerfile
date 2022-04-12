@@ -34,6 +34,8 @@ RUN set -euxo pipefail && \
 
 #  fix issue => env: 'python': No such file or directory
 # CMD ["ln", "-s", "/usr/bin/python3", "/usr/bin/python"]
+# CMD ["alternatives", "--set", "python", "/usr/bin/python3"]
+
 
 # Copy configuration files on the host into the image
 COPY etc "$TRINO_HOME/etc"
