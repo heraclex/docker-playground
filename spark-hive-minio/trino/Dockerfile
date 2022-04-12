@@ -1,6 +1,4 @@
-# FROM openjdk:8-jre
-# FROM centos:centos8
-FROM local/centos7-java8:latest
+FROM local/centos7:latest
 
 LABEL Description="Trino dev"
 
@@ -10,12 +8,10 @@ RUN yum install -y https://cdn.azul.com/zulu/bin/zulu-repo-1.0.0-1.noarch.rpm
 # install Azul Zulu 11 JDK 
 RUN yum install -y zulu11-jdk
 
-ENV JAVA_HOME=/usr/lib/jvm/zulu11
-
 
 WORKDIR /
 
-ARG TRINO_VERSION=370
+ARG TRINO_VERSION=375
 ARG TRINO_SERVER_PKG="trino-server-${TRINO_VERSION}.tar.gz"
 ARG TRINO_CLIENT_PKG="trino-cli-${TRINO_VERSION}-executable.jar"
 ARG TRINO_SERVER_URL="https://repo1.maven.org/maven2/io/trino/trino-server/${TRINO_VERSION}/${TRINO_SERVER_PKG}"
@@ -36,8 +32,14 @@ RUN set -euxo pipefail && \
 RUN set -euxo pipefail && \
     wget $TRINO_CLIENT_URL -O "${TRINO_HOME}/lib/$TRINO_CLIENT_PKG"
 
+#  fix issue => env: 'python': No such file or directory
+# CMD ["ln", "-s", "/usr/bin/python3", "/usr/bin/python"]
+# CMD ["alternatives", "--set", "python", "/usr/bin/python3"]
+
+
 # Copy configuration files on the host into the image
 COPY etc "$TRINO_HOME/etc"
+
 
 # Specify the entrypoint to start
 ENTRYPOINT $TRINO_HOME/bin/launcher run

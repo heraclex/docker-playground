@@ -1,7 +1,6 @@
 
 
 FROM centos:7
-MAINTAINER shopback (ravindra@shopback.com)
 
 LABEL Description="Java + CentOS (OpenJDK)"
 
