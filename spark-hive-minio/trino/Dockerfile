@@ -33,7 +33,7 @@ RUN set -euxo pipefail && \
     wget $TRINO_CLIENT_URL -O "${TRINO_HOME}/lib/$TRINO_CLIENT_PKG"
 
 #  fix issue => env: 'python': No such file or directory
-# RUN ln -s /usr/bin/python3 /usr/bin/python
+# CMD ["ln", "-s", "/usr/bin/python3", "/usr/bin/python"]
 
 # Copy configuration files on the host into the image
 COPY etc "$TRINO_HOME/etc"
