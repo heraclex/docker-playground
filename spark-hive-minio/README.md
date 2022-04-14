@@ -37,4 +37,6 @@ Build docker images:
 docker-compose build --no-cache centos7 centos8
 docker-compose build --no-cache metastore hive trino-coordinator spark-master superset
 ```
-Run containers `docker-compose up -d`
+Run all containers at once `docker-compose up -d`
+Run specific container/service `docker-compose up -d {services}`
+Stop & remove specific container/service `docker-compose rm -sv {services}`
