@@ -30,7 +30,6 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - ./.storage/postgres/shared:/postgres/shared
       - ./.storage/postgres/data:/var/lib/postgresql/data
     privileged: true
 
