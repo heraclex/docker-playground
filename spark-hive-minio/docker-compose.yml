@@ -67,6 +67,7 @@ services:
   
   superset:
     image: arezamoosavi/superset:latest
+    # image: apache/superset:latest
     container_name: superset
     environment:
       ADMIN_USERNAME: admin
@@ -77,6 +78,21 @@ services:
       - ./.storage/superset:/superset
     restart: unless-stopped
     command: bash -c "pip install sqlalchemy-trino && pip install trino"
+
+  # superset:
+  #   build:
+  #     context: ./superset
+  #     dockerfile: Dockerfile
+  #   container_name: superset
+  #   image: local/superset
+  #   ports:
+  #     - 8088:8088
+  #   environment:
+  #     ADMIN_USERNAME: admin
+  #     ADMIN_PWD: admin
+  #   volumes:
+  #     - ./.storage/superset:/superset
+  #   restart: unless-stopped
   
   spark-master:
     container_name: spark-master
