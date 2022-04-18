@@ -1,12 +1,18 @@
-FROM local/centos7:latest
+FROM local/centos8:latest
 
 LABEL Description="Trino dev"
 
-# add the Azul RPM repository 
-RUN yum install -y https://cdn.azul.com/zulu/bin/zulu-repo-1.0.0-1.noarch.rpm
+### Only when using centos7 ###
+# # add the Azul RPM repository 
+# RUN yum install -y https://cdn.azul.com/zulu/bin/zulu-repo-1.0.0-1.noarch.rpm
+# # install Azul Zulu 11 JDK 
+# RUN yum install -y zulu11-jdk
 
-# install Azul Zulu 11 JDK 
-RUN yum install -y zulu11-jdk
+
+### Only when using centos8 ###
+# install python 3.6 for centos8
+RUN yum install -y python36 && \
+    alternatives --set python /usr/bin/python3
 
 
 WORKDIR /

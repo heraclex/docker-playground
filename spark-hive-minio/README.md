@@ -40,3 +40,4 @@ docker-compose build --no-cache metastore hive trino-coordinator spark-master su
 Run all containers at once `docker-compose up -d`
 Run specific container/service `docker-compose up -d {services}`
 Stop & remove specific container/service `docker-compose rm -sv {services}`
+Debug Images `docker-compose run {services} bash`
