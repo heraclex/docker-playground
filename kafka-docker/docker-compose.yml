@@ -1,0 +1,27 @@
+
+version: '3.1'
+services:
+  zookeeper:
+    image: zookeeper:3.5.9
+    ports:
+      - "2181:2181"
+    restart: unless-stopped
+    hostname: zookeeper
+    volumes:
+      - ./storage/zookeeper/data:/data
+      - ./storage/zookeeper/datalog:/datalog
+
+  kafka:
+    build: 
+      context: ./kafka
+      dockerfile: Dockerfile
+    image: local/kafka
+    ports:
+      - "9092"
+    environment:
+      DOCKER_API_VERSION: 1.22
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.99.100
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - ./.storage/kafka/var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
