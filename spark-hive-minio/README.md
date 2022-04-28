@@ -41,3 +41,14 @@ Run all containers at once `docker-compose up -d`
 Run specific container/service `docker-compose up -d {services}`
 Stop & remove specific container/service `docker-compose rm -sv {services}`
 Debug Images `docker-compose run {services} bash`
+
+## 🖥 Nice UIs to play with
+
+- minio UI
+http://localhost:9001
+
+- trino UI
+http://localhost:8888
+
+- superset
+http://localhost:8088
