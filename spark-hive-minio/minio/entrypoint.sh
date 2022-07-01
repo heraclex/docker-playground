@@ -19,7 +19,7 @@ mc alias set myminio http://minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD --a
 # Create new canned policy by name readwrite-policy using readwrite-policy.json policy file.
 # mc admin policy add myminio readwrite-policy $MINIO_HOME/readwrite-policy.json
 
-buckets=("hive" "spark" "delta")
+buckets=("hive" "spark" "delta" "airflow")
 for bucket in ${buckets[@]}; do
     if [[ ! $(mc ls myminio | grep "$bucket") ]] && [[ ! $(mc admin user list myminio | grep "$bucket") ]]
     then
