@@ -11,13 +11,13 @@ services:
     volumes:
       - ./.storage/shared:/root/shared
 
-  zookeeper:
-    container_name: zookeeper
+  zookeeper0:
+    container_name: zookeeper0
     image: zookeeper:3.5.9
     ports:
       - "2181:2181"
     restart: unless-stopped
-    hostname: zookeeper
+    hostname: zookeeper0
     volumes:
       - ./.storage/zookeeper/data:/data
       - ./.storage/zookeeper/datalog:/datalog
@@ -41,7 +41,7 @@ services:
       # mechanism will be used.
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka0:9092"
       # Required. Instructs Kafka how to get in touch with ZooKeeper.
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper0:2181
       # Required when running in a single-node cluster, as we are. We would be able to take the default if we had
       # three or more nodes in the cluster.
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -55,16 +55,16 @@ services:
       - ./.storage/kafka/var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
     depends_on:
-      - zookeeper
+      - zookeeper0
   
   # Kafka Connect, an open source component of Apache Kafka,
   # is a framework for connecting Kafka with external systems
   # such as databases, key-value stores, search indexes, and file systems.
   # https://docs.confluent.io/current/connect/index.html
-  kafka-connect:
+  kafka-connect0:
     image: confluentinc/cp-kafka-connect:7.0.1
-    container_name: kafka-connect
-    hostname: kafka-connect
+    container_name: kafka-connect0
+    hostname: kafka-connect0
     ports:
       - 8083:8083
     environment:
@@ -87,14 +87,14 @@ services:
       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
       
       # Allows connect to leverage the power of schema registry. Here we define it for key schemas.
-      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry0:8081'
       
       # Required. Converter class for value Connect data. This controls the format of the
       # data that will be written to Kafka for source connectors or read from Kafka for sink connectors.
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       
       # Allows connect to leverage the power of schema registry. Here we define it for value schemas.
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry0:8081'
 
       # Required. Converter class for internal key Connect data that implements the Converter interface.
       CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
@@ -111,28 +111,28 @@ services:
     # This will instruct docker to wait until those services are up
     # before attempting to start kafka-connect.
     depends_on:
-      - zookeeper
+      - zookeeper0
       - kafka0
 
   # Written and open sourced by Confluent, the Schema Registry for Apache Kafka enables
   # developers to define standard schemas for their events, share them across the
   # organization and safely evolve them in a way that is backward compatible and future proof.
   # https://www.confluent.io/confluent-schema-registry/
-  schema-registry:
+  schema-registry0:
     image: confluentinc/cp-schema-registry:7.0.1
-    container_name: schema-registry
-    hostname: schema-registry
+    container_name: schema-registry0
+    hostname: schema-registry0
     # restart: unless-stopped
     ports:
       - 8081:8081
     environment:
       # Required. Schema Registry will contact ZooKeeper to figure out how to connect
       # to the Kafka cluster.
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper0:2181
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "PLAINTEXT://kafka0:9092"
 
       # Required. This is the hostname that Schema Registry will advertise in ZooKeeper.
-      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry0
     # Schema Registry relies upon both Kafka and ZooKeeper. This will instruct docker to wait
     # until the zookeeper and kafka services are up before attempting to start Schema Registry.
     depends_on:
@@ -150,11 +150,11 @@ services:
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka0:9092
-      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper0:2181
       KAFKA_CLUSTERS_0_JMXPORT: 9997
-      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry0:8081
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: first
-      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect0:8083
       # KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SASL_PLAINTEXT
       # KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: PLAIN
       # KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";'  
