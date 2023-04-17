@@ -1,4 +1,4 @@
-FROM local/centos8:latest
+FROM toanlee/centos8:1.0.0
 MAINTAINER Toan Le (https://www.linkedin.com/in/toanlee/)
 
 ARG MINIO_VERSION=linux-arm64

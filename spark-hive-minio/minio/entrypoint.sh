@@ -27,7 +27,7 @@ for bucket in ${buckets[@]}; do
         mc mb myminio/$bucket
         echo "creating user $bucket ${bucket}12345"
         mc admin user add myminio $bucket ${bucket}12345
-        mc admin policy set myminio readwrite user=$bucket
+        mc admin policy attach myminio readwrite user=$bucket
     fi
 done
 
