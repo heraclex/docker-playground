@@ -16,13 +16,14 @@
 # limitations under the License.
 #
 set -e
+# set -eux
 
 #
 # Always install local overrides first
 #
-/app/docker/docker-bootstrap.sh 'app-gunicorn'
+# /app/docker/docker-bootstrap.sh
 
-STEP_CNT=4
+STEP_CNT=3
 
 echo_step() {
 cat <<EOF
@@ -31,15 +32,11 @@ Init Step ${1}/${STEP_CNT} [${2}] -- ${3}
 ######################################################################
 EOF
 }
+
 ADMIN_PASSWORD="admin"
 POSTGRESDB_HOST="postgres-db"
-# If Cypress run – overwrite the password for admin and export env variables
-if [ "$CYPRESS_CONFIG" == "true" ]; then
-    ADMIN_PASSWORD="general"
-    export SUPERSET_CONFIG=tests.integration_tests.superset_test_config
-    export SUPERSET_TESTENV=true
-    export SUPERSET__SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://superset:superset@${POSTGRESDB_HOST}:5432/superset
-fi
+
+
 # Initialize the database
 echo_step "1" "Starting" "Applying DB migrations"
 superset db upgrade
@@ -59,15 +56,4 @@ echo_step "3" "Starting" "Setting up roles and perms"
 superset init
 echo_step "3" "Complete" "Setting up roles and perms"
 
-if [ "$SUPERSET_LOAD_EXAMPLES" = "yes" ]; then
-    # Load some data to play with
-    echo_step "4" "Starting" "Loading examples"
-    # If Cypress run which consumes superset_test_config – load required data for tests
-    if [ "$CYPRESS_CONFIG" == "true" ]; then
-        superset load_test_users
-        superset load_examples --load-test-data
-    else
-        superset load_examples
-    fi
-    echo_step "4" "Complete" "Loading examples"
-fi
+/app/docker/docker-bootstrap.sh 'app-gunicorn'
