@@ -11,6 +11,7 @@ ADD init-metastore-db.sh /docker-entrypoint-initdb.d/init-metastore-db.sh
 ADD init-datastore-db.sh /docker-entrypoint-initdb.d/init-datastore-db.sh
 ADD init-airflow-db.sh /docker-entrypoint-initdb.d/init-airflow-db.sh
 ADD init-metabase-db.sh /docker-entrypoint-initdb.d/init-metabase-db.sh
+ADD init-superset-db.sh /docker-entrypoint-initdb.d/init-superset-db.sh
 
 # adding datastore for spark app
 ADD datastore.sql /datastore.sql

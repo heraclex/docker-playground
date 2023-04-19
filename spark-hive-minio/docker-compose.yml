@@ -44,14 +44,12 @@ services:
   metabase:
     container_name: metabase
     image: local/metabase:v0.45.2-databricks
-    # image: metabase:0.45.2-db
     restart: always
     ports:
       - '3001:3000'
     volumes:
       # declare your mount volume /host/dir:/container/dir
       - ./.storage/metabase:/metabase-data
-      # - ./metabase/plugins:/plugins
     environment:
       MB_DB_TYPE: postgres
       MB_DB_DBNAME: metabase
@@ -97,18 +95,24 @@ services:
       retries: 3
   
   superset:
-    image: arezamoosavi/superset:latest
+    # image: arezamoosavi/superset:latest
     # image: apache/superset:latest
+    build:
+      context: ./superset
+      dockerfile: Dockerfile
+    image: local/superset:latest
     container_name: superset
     environment:
-      ADMIN_USERNAME: admin
-      ADMIN_PWD: admin
+      SUPERSET_SECRET_KEY: thisismysecretkey
     ports:
       - 8088:8088
     volumes:
       - ./.storage/superset:/superset
-    restart: unless-stopped
-    command: bash -c "pip install sqlalchemy-trino && pip install trino"
+    # restart: unless-stopped
+    depends_on:
+      - postgres
+    links:
+      - postgres
 
   # superset:
   #   build:
