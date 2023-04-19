@@ -18,22 +18,23 @@ services:
     volumes:
       - ./.shared:/root/shared
 
-  metastore:
+  postgres:
     build:
-      context: ./metastore
+      context: ./postgres
       dockerfile: Dockerfile
-    container_name: metastore
-    image: local/metastore
+    container_name: postgres
+    hostname: postgres-db # host name in virtual private network inside docker (used to connect from other service)
+    image: local/postgres:latest
     environment:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: postgres
         POSTGRES_DB: postgres
-        METABASE_DB_USER: metabase
-        METABASE_DB_PASS: metabase
-        METABASE_DB_NAME: metabase
-        AIRFLOW_DB_USER: airflow
-        AIRFLOW_DB_PASS: airflow
-        AIRFLOW_DB_NAME: airflow
+        # METABASE_DB_USER: metabase
+        # METABASE_DB_PASS: metabase
+        # METABASE_DB_NAME: metabase
+        # AIRFLOW_DB_USER: airflow
+        # AIRFLOW_DB_PASS: airflow
+        # AIRFLOW_DB_NAME: airflow
     ports:
       - '5432:5432'
     volumes:
@@ -42,26 +43,26 @@ services:
 
   metabase:
     container_name: metabase
-    image: metabase/metabase:latest
+    image: local/metabase:v0.45.2-databricks
+    # image: metabase:0.45.2-db
     restart: always
     ports:
       - '3001:3000'
     volumes:
       # declare your mount volume /host/dir:/container/dir
-      - ./data/metabase:/metabase-data
+      - ./.storage/metabase:/metabase-data
+      # - ./metabase/plugins:/plugins
     environment:
       MB_DB_TYPE: postgres
       MB_DB_DBNAME: metabase
       MB_DB_PORT: 5432
       MB_DB_USER: metabase
       MB_DB_PASS: metabase
-      # MB_DB_HOST: postgres-db
+      MB_DB_HOST: postgres-db
     depends_on:
-      - metastore
-    # links:
-    #   - metastore
-    # networks:
-    #   - experimenta-backend
+      - postgres
+    links:
+      - postgres
 
   hive:
     build:
@@ -72,7 +73,7 @@ services:
     ports:
       - '9083:9083'      
     depends_on:
-      - metastore
+      - postgres
       - minio
 
   minio:
