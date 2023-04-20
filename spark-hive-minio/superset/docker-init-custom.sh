@@ -23,7 +23,7 @@ set -e
 #
 # /app/docker/docker-bootstrap.sh
 
-STEP_CNT=3
+STEP_CNT=4
 
 echo_step() {
 cat <<EOF
@@ -35,7 +35,6 @@ EOF
 
 ADMIN_PASSWORD="admin"
 POSTGRESDB_HOST="postgres-db"
-$CYPRESS_CONFIG='true'
 
 ### STEP1: Initialize the database
 echo_step "1" "Starting" "Applying DB migrations"
@@ -58,14 +57,18 @@ superset init
 echo_step "3" "Complete" "Setting up roles and perms"
 
 ### STEP4: Create default roles and permissions
-echo_step "4" "Starting" "Loading examples"
-# If Cypress run which consumes superset_test_config – load required data for tests
-if [ "$CYPRESS_CONFIG" == "true" ]; then
-    superset load_test_users
-    superset load_examples --load-test-data
-else
-    superset load_examples
+# SUPERSET_LOAD_EXAMPLES & CYPRESS_CONFIG are from .env-non-dev
+if [ "$SUPERSET_LOAD_EXAMPLES" = "yes" ]; then
+    # Load some data to play with
+    echo_step "4" "Starting" "Loading examples"
+    # If Cypress run which consumes superset_test_config – load required data for tests
+    if [ "$CYPRESS_CONFIG" == "true" ]; then
+        superset load_test_users
+        superset load_examples --load-test-data
+    else
+        superset load_examples
+    fi
+    echo_step "4" "Complete" "Loading examples"
 fi
-echo_step "4" "Complete" "Loading examples"
 
 /app/docker/docker-bootstrap.sh 'app-gunicorn'
