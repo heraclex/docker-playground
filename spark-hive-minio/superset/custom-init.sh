@@ -36,7 +36,6 @@ EOF
 ADMIN_PASSWORD="admin"
 POSTGRESDB_HOST="postgres-db"
 
-
 # Initialize the database
 echo_step "1" "Starting" "Applying DB migrations"
 superset db upgrade
