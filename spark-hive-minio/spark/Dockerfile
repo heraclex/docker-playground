@@ -67,4 +67,4 @@ EXPOSE 8020 8042 8088 9000 10020 19888 50010 50020 50070 50075 50090 10000 10002
 COPY spark-master.sh /
 COPY spark-worker.sh /
 RUN chmod +x /spark-master.sh
-RUN chmod +x /spark-master.sh
+RUN chmod +x /spark-worker.sh

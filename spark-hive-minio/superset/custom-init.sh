@@ -35,13 +35,14 @@ EOF
 
 ADMIN_PASSWORD="admin"
 POSTGRESDB_HOST="postgres-db"
+$CYPRESS_CONFIG='true'
 
-# Initialize the database
+### STEP1: Initialize the database
 echo_step "1" "Starting" "Applying DB migrations"
 superset db upgrade
 echo_step "1" "Complete" "Applying DB migrations"
 
-# Create an admin user
+### STEP2: Create an admin user
 echo_step "2" "Starting" "Setting up admin user ( admin / $ADMIN_PASSWORD )"
 superset fab create-admin \
               --username admin \
@@ -50,9 +51,21 @@ superset fab create-admin \
               --email admin@superset.com \
               --password $ADMIN_PASSWORD
 echo_step "2" "Complete" "Setting up admin user"
-# Create default roles and permissions
+
+### STEP3: Create default roles and permissions
 echo_step "3" "Starting" "Setting up roles and perms"
 superset init
 echo_step "3" "Complete" "Setting up roles and perms"
+
+### STEP4: Create default roles and permissions
+echo_step "4" "Starting" "Loading examples"
+# If Cypress run which consumes superset_test_config – load required data for tests
+if [ "$CYPRESS_CONFIG" == "true" ]; then
+    superset load_test_users
+    superset load_examples --load-test-data
+else
+    superset load_examples
+fi
+echo_step "4" "Complete" "Loading examples"
 
 /app/docker/docker-bootstrap.sh 'app-gunicorn'

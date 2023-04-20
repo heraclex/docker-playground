@@ -105,7 +105,7 @@ services:
     environment:
       SUPERSET_SECRET_KEY: thisismysecretkey
       # SQLALCHEMY_DATABASE_URI: 'sqlite:////superset/superset.db'
-      # SQLALCHEMY_DATABASE_URI: 'postgresql+psycopg2://superset:superset@$postgres-db:5432/superset'
+      SQLALCHEMY_DATABASE_URI: postgresql+psycopg2://superset:superset@postgres-db:5432/superset
       SUPERSET__SQLALCHEMY_DATABASE_URI: postgresql+psycopg2://superset:superset@postgres-db:5432/superset
       WTF_CSRF_ENABLED: True
       # WTF_CSRF_EXEMPT_LIST: Null
@@ -120,21 +120,7 @@ services:
     links:
       - postgres
 
-  # superset:
-  #   build:
-  #     context: ./superset
-  #     dockerfile: Dockerfile
-  #   container_name: superset
-  #   image: local/superset
-  #   ports:
-  #     - 8088:8088
-  #   environment:
-  #     ADMIN_USERNAME: admin
-  #     ADMIN_PWD: admin
-  #   volumes:
-  #     - ./.storage/superset:/superset
-  #   restart: unless-stopped
-  
+  ### SPARK and TRINO ###
   spark-master:
     container_name: spark-master
     image: local/spark
