@@ -105,8 +105,8 @@ services:
     environment:
       SUPERSET_SECRET_KEY: thisismysecretkey
       # SQLALCHEMY_DATABASE_URI: 'sqlite:////superset/superset.db'
-      SQLALCHEMY_DATABASE_URI: postgresql+psycopg2://superset:superset@postgres-db:5432/superset
-      SUPERSET__SQLALCHEMY_DATABASE_URI: postgresql+psycopg2://superset:superset@postgres-db:5432/superset
+      SQLALCHEMY_DATABASE_URI: 'postgresql+psycopg2://superset:superset@postgres-db:5432/superset'
+      SUPERSET__SQLALCHEMY_DATABASE_URI: 'postgresql+psycopg2://superset:superset@postgres-db:5432/superset'
       WTF_CSRF_ENABLED: True
       # WTF_CSRF_EXEMPT_LIST: Null
       MAPBOX_API_KEY: ''
