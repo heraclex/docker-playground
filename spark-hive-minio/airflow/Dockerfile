@@ -1,5 +1,7 @@
-#FROM python:3.7-slim-stretch
-FROM python:3.9-slim
+FROM apache/airflow:2.7.3
+# FROM python:3.9-slim
+
+USER root
 
 # Install OpenJDK 17
 RUN mkdir -p /usr/share/man/man1 && \
@@ -12,33 +14,34 @@ ENV PATH=$PATH:$JAVA_HOME/bin
 RUN echo $JAVA_HOME
 
 # Update & install apt-get packages
-RUN apt-get update -y && \
-    apt-get install -y \
-    libzbar-dev \
-    bash \
-    gcc \
-    git \
-    libc-dev \
-    curl \
-    wget \
-    vim \
-    nano \
-    iputils-ping \
-    telnet \
-    openssh-client \
-    net-tools \
-    man \
-    unzip \
-    vim-tiny \
-    bc \
-    openssh-server \
-    thrift-compiler \
-    # netcat \
-    sudo \
-    build-essential
+# RUN apt-get update -y && \
+#     apt-get install -y \
+#     libzbar-dev \
+#     bash \
+#     gosu \
+#     gcc \
+#     git \
+#     libc-dev \
+#     curl \
+#     wget \
+#     vim \
+#     nano \
+#     iputils-ping \
+#     telnet \
+#     openssh-client \
+#     net-tools \
+#     man \
+#     unzip \
+#     vim-tiny \
+#     bc \
+#     openssh-server \
+#     thrift-compiler \
+#     # netcat \
+#     sudo \
+#     build-essential
 
-RUN apt-get autoremove -y
-RUN apt-get clean
+# RUN apt-get autoremove -y
+# RUN apt-get clean
 
 
 # Install Spark
@@ -51,25 +54,29 @@ RUN curl --progress-bar -L --retry 3 \
   "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/${SPARK_PACKAGE}.tgz" \
   | gunzip \
   | tar x -C /usr/ \
- && mv "/usr/${SPARK_PACKAGE}" "${SPARK_HOME}" \
- && chown -R root:root "${SPARK_HOME}"
+ && mv "/usr/${SPARK_PACKAGE}" "${SPARK_HOME}" 
+ # && chown -R root:root "${SPARK_HOME}"
 
 
 ENV PATH="${PATH}:${SPARK_HOME}/sbin:${SPARK_HOME}/bin"
 ENV PYTHONPATH=$SPARK_HOME/python3:$SPARK_HOME/python3/lib/py4j-0.10.7-src.zip:$PYTHONPATH
 
-# Install airflow
+
+COPY ./dags ./opt/airflow/dags
+COPY airflow.cfg /opt/airflow/airflow.cfg
+RUN chmod -R a+rwx /opt/airflow 
+
+COPY run.sh ./run.sh
+RUN chmod +x ./run.sh
+
+USER airflow
+# Install extra packages
 COPY requirements.txt requirements.txt
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 
-COPY ./dags ./opt/airflow/dags
-RUN chmod -R a+rwx /opt/airflow
-COPY airflow.cfg /opt/airflow/airflow.cfg
-COPY run.sh ./run.sh
-RUN chmod +x /run.sh
 WORKDIR /opt/airflow
 
-CMD /run.sh
+CMD ./run.sh
 EXPOSE 8000
