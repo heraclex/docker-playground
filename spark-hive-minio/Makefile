@@ -13,6 +13,12 @@ trino-cluster:
 superset:
 	docker-compose up -d superset
 
+spark:
+	docker-compose up -d spark-master spark-worker
+
+airflow:
+	docker-compose up -d postgres redis airflow-init airflow-webserver airflow-scheduler airflow-worker airflow-triggerer
+
 down-v:
 	docker-compose down -v
 	sleep 3

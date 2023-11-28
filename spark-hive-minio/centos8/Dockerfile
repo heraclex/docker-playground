@@ -16,10 +16,14 @@ RUN set -euxo pipefail && \
     yum install -y telnet wget hostname ca-certificates \
     openssh-server openssh-clients tar which net-tools 
 
-# add the Azul RPM repository 
+# add the Azul RPM repository and install zulu8, zulu11 sdk
 RUN set -euxo pipefail && \
     yum install -y https://cdn.azul.com/zulu/bin/zulu-repo-1.0.0-1.noarch.rpm && \
     yum install -y zulu8-jdk zulu11-jdk
+
+# install python3
+RUN set -euxo pipefail && \
+    yum install -y python3
 
 # set to java 8 by default. Can be overwrited on dockerfile
 # update this java version to the desired java version

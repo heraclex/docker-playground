@@ -1,7 +1,11 @@
-FROM local/centos7:latest
+# FROM local/centos7:latest
+FROM local/centos8:latest
+# FROM python:3.9-slim-bullseye
+
 MAINTAINER Toan Le (https://www.linkedin.com/in/toanlee/)
 
 LABEL Description="Spark Dev"
+
 RUN echo $JAVA_HOME
 
 WORKDIR /
@@ -9,12 +13,14 @@ WORKDIR /
 # https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Spark
-ARG SPARK_VERSION=3.2.1
-ARG HADOOP_VERSION=3.2
+# Install Spark
+ARG SPARK_VERSION=3.5.0
+ARG HADOOP_VERSION=3
 ARG SPARK_PACKAGE="spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}"
 ENV SPARK_HOME /usr/spark
 ENV PATH="${PATH}:${SPARK_HOME}/sbin:${SPARK_HOME}/bin"
+ENV PYTHONPATH=$SPARK_HOME/python3:$SPARK_HOME/python3/lib/py4j-0.10.7-src.zip:$PYTHONPATH
+
 RUN curl --progress-bar -L --retry 3 \
   "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/${SPARK_PACKAGE}.tgz" \
   | gunzip \
@@ -36,7 +42,7 @@ RUN curl --progress-bar -L \
 RUN cd "${SPARK_HOME}/jars" && \
     wget --no-verbose https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/1.11.534/aws-java-sdk-1.11.534.jar && \
     wget --no-verbose https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.874/aws-java-sdk-bundle-1.11.874.jar && \
-    wget --no-verbose https://repo1.maven.org/maven2/io/delta/delta-core_2.12/1.0.0/delta-core_2.12-1.0.0.jar && \
+    wget --no-verbose https://repo1.maven.org/maven2/io/delta/delta-core_2.12/2.4.0/delta-core_2.12-2.4.0.jar && \
     wget --no-verbose https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.2.0/hadoop-aws-3.2.0.jar && \
     cd /
 
@@ -57,14 +63,13 @@ HEALTHCHECK CMD curl -f http://host.docker.internal:8080/ \
 #     mkdir /root/.ssh && \
 #     chmod 0700 /root/.ssh
 # COPY ssh/config /root/.ssh/
-
-
-EXPOSE 8020 8042 8088 9000 10020 19888 50010 50020 50070 50075 50090 10000 10002 4040 7077 8080 8081
-
+# EXPOSE 8020 8042 8088 9000 10020 19888 50010 50020 50070 50075 50090 10000 10002 4040 7077 8080 8081
 
 # Entry point: start all services and applications.
+
 # ADD spark-master.sh spark-worker.sh /
-COPY spark-master.sh /
-COPY spark-worker.sh /
-RUN chmod +x /spark-master.sh
-RUN chmod +x /spark-worker.sh
+COPY spark-master.sh spark-worker.sh /
+
+RUN chmod +x /spark-master.sh /spark-worker.sh
+
+
