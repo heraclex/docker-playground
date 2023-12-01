@@ -8,6 +8,7 @@ srcdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # start minio
 echo "Start Minio...."
+# MINIO_ROOT_USER & MINIO_ROOT_PASSWORD will be passed from docker-compose
 # MINIO_ROOT_USER=minio 
 # MINIO_ROOT_PASSWORD=minio123 
 minio server /data --console-address ":9001" & 
@@ -27,7 +28,7 @@ for bucket in ${buckets[@]}; do
         mc mb myminio/$bucket
         echo "creating user $bucket ${bucket}12345"
         mc admin user add myminio $bucket ${bucket}12345
-        mc admin policy attach myminio readwrite user=$bucket
+        mc admin policy attach myminio readwrite --user $bucket
     fi
 done
 

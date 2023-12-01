@@ -33,134 +33,20 @@ x-airflow-common:
 
 
 services:
-
-  centos7:
-    build:
-      context: ./centos7
-      dockerfile: Dockerfile
-    image: local/centos7
-    container_name: centos7
-    volumes:
-      - ./.shared:/root/shared
-  centos8:
-    build:
-      context: ./centos8
-      dockerfile: Dockerfile
-    image: local/centos8
-    container_name: centos8
-    volumes:
-      - ./.shared:/root/shared
-
   postgres:
-    build:
-      context: ./postgres
-      dockerfile: Dockerfile
-    container_name: postgres
-    hostname: postgres-db # host name in virtual private network inside docker (used to connect from other service)
-    image: local/postgres:latest
+    image: postgres:13
     environment:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_DB: postgres
-        # METABASE_DB_USER: metabase
-        # METABASE_DB_PASS: metabase
-        # METABASE_DB_NAME: metabase
-        # AIRFLOW_DB_USER: airflow
-        # AIRFLOW_DB_PASS: airflow
-        # AIRFLOW_DB_NAME: airflow
-    ports:
-      - '5432:5432'
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
     volumes:
-      - ./.storage/postgres/data:/var/lib/postgresql/data
+      - postgres-db-volume:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 5s
       retries: 5
-    privileged: true
-
-  metabase:
-    container_name: metabase
-    image: local/metabase:v0.45.2-databricks
     restart: always
-    ports:
-      - '3001:3000'
-    volumes:
-      # declare your mount volume /host/dir:/container/dir
-      - ./.storage/metabase:/metabase-data
-    environment:
-      MB_DB_TYPE: postgres
-      MB_DB_DBNAME: metabase
-      MB_DB_PORT: 5432
-      MB_DB_USER: metabase
-      MB_DB_PASS: metabase
-      MB_DB_HOST: postgres-db
-    depends_on:
-      - postgres
-    links:
-      - postgres
-
-  hive:
-    build:
-      context: ./hive
-      dockerfile: Dockerfile
-    container_name: hive
-    image: local/hive
-    profiles: ["hive"]
-    ports:
-      - '9083:9083'      
-    depends_on:
-      - postgres
-      - minio
-
-  minio:
-    build:
-      context: ./minio
-      dockerfile: Dockerfile
-    container_name: minio
-    image: local/minio
-    environment:
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: minio123
-    ports:
-      - '9000:9000'
-      - "9001:9001"
-    volumes:
-      - ./.storage/minio:/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://minio:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
   
-  superset:
-    # image: arezamoosavi/superset:latest
-    # image: apache/superset:latest
-    build:
-      context: ./superset
-      dockerfile: Dockerfile
-    image: local/superset:2.1.0
-    container_name: superset
-    env_file: ./superset/.env-non-dev
-    # environment:
-    #   SUPERSET_SECRET_KEY: thisismysecretkey
-    #   # SQLALCHEMY_DATABASE_URI: 'sqlite:////superset/superset.db'
-    #   SQLALCHEMY_DATABASE_URI: 'postgresql+psycopg2://superset:superset@127.0.0.1:5432/superset'
-    #   SUPERSET__SQLALCHEMY_DATABASE_URI: 'postgresql+psycopg2://superset:superset@127.0.0.1:5432/superset'
-    #   WTF_CSRF_ENABLED: True
-    #   # WTF_CSRF_EXEMPT_LIST: Null
-    #   MAPBOX_API_KEY: ''
-    ports:
-      - 8088:8088
-    volumes:
-      - ./.storage/superset:/superset
-    # restart: unless-stopped
-    depends_on:
-      - postgres
-    links:
-      - postgres
-
-  # ### Airflow ###
-
   redis:
     image: redis:latest
     expose:
@@ -314,53 +200,3 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-
-  ### SPARK and TRINO ###
-
-  spark-master:
-    container_name: spark-master
-    image: local/spark3.5
-    build:
-      context: ./spark
-      dockerfile: Dockerfile
-    # restart: unless-stopped
-    ports:
-      - 4040:4040
-      - 7077:7077
-      - 8080:8080
-      - 18080:18080 
-    command: sh spark-master.sh
-
-  spark-worker:
-    build:
-      context: ./spark
-      dockerfile: Dockerfile
-    container_name: spark-worker
-    image: local/spark3.5
-    # restart: unless-stopped
-    ports:
-      # - "8081-8085:8081"
-      - 8081:8081
-    command: sh spark-worker.sh
-
-  trino-coordinator:
-    container_name: trino-coordinator
-    image: local/trino
-    build:
-      context: ./trino
-      dockerfile: Dockerfile
-    ports:
-      - "8888:8888"
-    volumes:
-      - ./trino/coordinator_config.properties:/usr/trino/etc/config.properties
-      - ./trino/etc/catalog:/usr/trino/etc/catalog
-
-  trino-worker:
-    container_name: trino-worker
-    image: local/trino
-    build:
-      context: ./trino
-      dockerfile: Dockerfile
-    volumes:
-      - ./trino/worker_config.properties:/usr/trino/etc/config.properties
-      - ./trino/etc/catalog:/usr/trino/etc/catalog
