@@ -1,0 +1,29 @@
+version: '3.1'
+
+services:
+
+  spark-master:
+    container_name: spark-master
+    image: local/spark:3.5.0
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    # restart: unless-stopped
+    ports:
+      - 4040:4040
+      - 7077:7077
+      - 8080:8080
+      - 18080:18080 
+    command: sh spark-master.sh
+
+  spark-worker:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-worker
+    image: local/spark:3.5.0
+    # restart: unless-stopped
+    ports:
+      # - "8081-8085:8081"
+      - 8081:8081
+    command: sh spark-worker.sh

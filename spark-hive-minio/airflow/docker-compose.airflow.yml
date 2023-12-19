@@ -4,7 +4,7 @@ version: '3.1'
 x-airflow-common:
   &airflow-common
   # image: apache/airflow:2.7.3
-  image: local/airflow
+  image: local/airflow:2.7.3
   profiles: ["airflow"]
   environment:
     &airflow-common-env
@@ -20,9 +20,9 @@ x-airflow-common:
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
   volumes:
-    - ./airflow/mnt/dags:/opt/airflow/dags
-    - ./airflow/mnt/logs:/opt/airflow/logs
-    - ./airflow/mnt/plugins:/opt/airflow/plugins
+    - .storage/airflow/mnt/dags:/opt/airflow/dags
+    - .storage/airflow/mnt/logs:/opt/airflow/logs
+    - .storage/airflow/mnt/plugins:/opt/airflow/plugins
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -39,8 +39,8 @@ services:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
-    volumes:
-      - postgres-db-volume:/var/lib/postgresql/data
+    volumes: 
+      - ./.storage/postgres/data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 5s

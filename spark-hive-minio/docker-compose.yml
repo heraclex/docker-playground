@@ -20,9 +20,9 @@ x-airflow-common:
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
   volumes:
-    - ./airflow/mnt/dags:/opt/airflow/dags
-    - ./airflow/mnt/logs:/opt/airflow/logs
-    - ./airflow/mnt/plugins:/opt/airflow/plugins
+    - ./.storage/airflow/dags:/opt/airflow/dags
+    - ./.storage/airflow/logs:/opt/airflow/logs
+    - ./.storage/airflow/plugins:/opt/airflow/plugins
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -42,6 +42,7 @@ services:
     container_name: centos7
     volumes:
       - ./.shared:/root/shared
+  
   centos8:
     build:
       context: ./centos8
@@ -159,7 +160,9 @@ services:
     links:
       - postgres
 
-  # ### Airflow ###
+  ### Airflow ###
+
+  ### Airflow ###
 
   redis:
     image: redis:latest
@@ -319,7 +322,7 @@ services:
 
   spark-master:
     container_name: spark-master
-    image: local/spark3.5
+    image: local/spark:3.5.0
     build:
       context: ./spark
       dockerfile: Dockerfile
@@ -336,7 +339,7 @@ services:
       context: ./spark
       dockerfile: Dockerfile
     container_name: spark-worker
-    image: local/spark3.5
+    image: local/spark:3.5.0
     # restart: unless-stopped
     ports:
       # - "8081-8085:8081"
