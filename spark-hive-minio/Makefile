@@ -13,7 +13,7 @@ trino-cluster:
 superset:
 	docker-compose up -d superset
 
-spark-image-build:
+spark-build-image:
 	docker build spark/. --no-cache -t local/spark:3.5.1
 
 spark-up:
