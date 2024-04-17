@@ -21,13 +21,14 @@ mc alias set myminio http://minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD --a
 # mc admin policy add myminio readwrite-policy $MINIO_HOME/readwrite-policy.json
 
 buckets=("hive" "spark" "delta" "airflow")
+suffix=123
 for bucket in ${buckets[@]}; do
     if [[ ! $(mc ls myminio | grep "$bucket") ]] && [[ ! $(mc admin user list myminio | grep "$bucket") ]]
     then
         echo "creating bucket $bucket...."
         mc mb myminio/$bucket
-        echo "creating user $bucket ${bucket}12345"
-        mc admin user add myminio $bucket ${bucket}12345
+        echo "creating user $bucket $bucket$suffix"
+        mc admin user add myminio $bucket $bucket$suffix
         mc admin policy attach myminio readwrite --user $bucket
     fi
 done

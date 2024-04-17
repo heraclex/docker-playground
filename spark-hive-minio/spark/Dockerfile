@@ -19,7 +19,7 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 # Install dependencies (open-jdk-17 & python3)
 RUN apk update
-RUN apk add --no-cache openjdk17-jdk python3 python3-dev py3-pip curl wget bash
+RUN apk add --no-cache openjdk17-jdk python3 python3-dev py3-pip curl wget bash procps
 RUN rm -rf /var/cache/apk/*
 
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk
@@ -73,18 +73,16 @@ HEALTHCHECK CMD curl -f http://host.docker.internal:8080/ \
 
 COPY spark-defaults.conf "${SPARK_CONF_DIR}"/
 
-RUN chmod u+x /opt/spark/sbin/* && \
-    chmod u+x /opt/spark/bin/*
+RUN chmod 755 /opt/spark/sbin/* && \
+    chmod 755 /opt/spark/bin/*
 
 # create history and event logs folder
 RUN mkdir -p ${SPARK_HOME}/history
-RUN chmod u+x ${SPARK_HOME}/history
+RUN chmod 755 ${SPARK_HOME}/history
 
 EXPOSE 4040 7077 8080 18080
 
 # Copy scripts and set permissions
 RUN cd /
 COPY spark-master.sh spark-worker.sh entrypoint.sh /
-RUN chmod u+x /spark-master.sh /spark-worker.sh /entrypoint.sh
-RUN chmod u+x /opt/spark/sbin/* && \
-    chmod u+x /opt/spark/bin/*
+RUN chmod u+x /entrypoint.sh

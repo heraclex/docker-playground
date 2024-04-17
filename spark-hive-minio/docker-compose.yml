@@ -119,7 +119,7 @@ services:
       context: ./minio
       dockerfile: Dockerfile
     container_name: minio
-    image: local/minio
+    image: local/minio:linux-arm64
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio123
@@ -369,13 +369,16 @@ services:
       dockerfile: Dockerfile
     container_name: spark-history
     image: local/spark:3.5.1
-    # restart: unless-stopped
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
     ports:
-      # - "8081-8085:8081"
       - 18080:18080
     command: sh entrypoint.sh history
     depends_on:
       - spark-master
+    
+
 
   trino-coordinator:
     container_name: trino-coordinator
