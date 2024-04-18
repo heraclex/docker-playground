@@ -46,14 +46,15 @@ RUN cd /opt/ \
     && rm ${SPARK_PACKAGE}.tgz
 COPY jars/spark-hive_${SCALA_VERSION}-${SPARK_VERSION}.jar \
         jars/spark-hive-thriftserver_${SCALA_VERSION}-${SPARK_VERSION}.jar \
-        jars/aws-java-sdk-1.12.634.jar \
-        jars/aws-java-sdk-bundle-1.12.634.jar \
-        jars/aws-java-sdk-s3-1.12.634.jar \
+        jars/aws-java-sdk-1.12.262.jar \
+        jars/aws-java-sdk-bundle-1.12.262.jar \
+        jars/aws-java-sdk-s3-1.12.262.jar \
+        jars/aws-java-sdk-core-1.12.262.jar \
         # jars/delta-core_2.12-2.4.0.jar \
         jars/hadoop-aws-3.3.4.jar \
         jars/hadoop-common-3.3.4.jar \
-        jars/hadoop-client-3.3.4.jar \
-        jars/hadoop-mapreduce-client-core-3.3.4.jar \
+        # jars/hadoop-client-3.3.4.jar \
+        # jars/hadoop-mapreduce-client-core-3.3.4.jar \
      ${SPARK_HOME}/jars/
 
 # Spark setup

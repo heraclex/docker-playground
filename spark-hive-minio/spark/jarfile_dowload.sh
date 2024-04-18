@@ -23,9 +23,10 @@ hadoop_packages=(
 )
 
 aws_packages=(
-    'aws-java-sdk==1.12.634'
-    'aws-java-sdk-bundle==1.12.634'
-    'aws-java-sdk-s3==1.12.634'
+    'aws-java-sdk==1.12.262'
+    'aws-java-sdk-bundle==1.12.262'
+    'aws-java-sdk-s3==1.12.262'
+    'aws-java-sdk-core==1.12.262'
 )
 
 
