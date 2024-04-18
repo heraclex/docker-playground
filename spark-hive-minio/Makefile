@@ -1,9 +1,22 @@
 .PHONY: hive trino superset down
 
-hive:
-	docker-compose up -d metastore minio
-	sleep 3
+minio-build-image:
+	docker build minio/. --no-cache -t local/minio:linux-arm64
+
+minio-up:
+	docker-compose up -d minio
+
+minio-down:
+	docker-compose down -v minio
+
+hive-build-image:
+	docker build hive/. --no-cache -t local/hive:3.0.0
+
+hive-up:
 	docker-compose up -d hive
+
+hive-down:
+	docker-compose down -v hive
 
 trino-cluster:
 	docker-compose up -d trino-coordinator
