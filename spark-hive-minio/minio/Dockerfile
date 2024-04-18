@@ -24,6 +24,8 @@ RUN mkdir ${MINIO_HOME} && \
 # minio setup
 # COPY conf/minio-config.json /root/.mc/config.json
 
+COPY empty.txt /
+
 EXPOSE 9000 9001
 
 # COPY ssh/config /root/.ssh/

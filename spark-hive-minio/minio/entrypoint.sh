@@ -21,7 +21,7 @@ mc alias set myminio http://minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD --a
 # mc admin policy add myminio readwrite-policy $MINIO_HOME/readwrite-policy.json
 
 buckets=("hive" "spark" "delta" "airflow")
-suffix=123
+suffix=12345
 for bucket in ${buckets[@]}; do
     if [[ ! $(mc ls myminio | grep "$bucket") ]] && [[ ! $(mc admin user list myminio | grep "$bucket") ]]
     then
@@ -33,5 +33,7 @@ for bucket in ${buckets[@]}; do
     fi
 done
 
+echo "creating spark/event-log folder"
+mc cp /empty.txt myminio/spark/event-log/
 
 tail -f /dev/null
