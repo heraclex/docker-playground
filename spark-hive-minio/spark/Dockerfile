@@ -32,7 +32,8 @@ RUN echo $JAVA_HOME
 # Install Spark
 ARG SPARK_VERSION=3.5.1
 ARG HADOOP_VERSION=3
-ARG SPARK_PACKAGE="spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}"
+# ARG SPARK_PACKAGE="spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}"
+ARG SPARK_PACKAGE="spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}-scala2.13"
 ARG SCALA_VERSION=2.13
 ENV PATH="${PATH}:${SPARK_HOME}/sbin:${SPARK_HOME}/bin"
 ENV PYTHONPATH=$SPARK_HOME/python3:$SPARK_HOME/python3/lib/py4j-0.10.7-src.zip:$PYTHONPATH
@@ -50,11 +51,14 @@ COPY jars/spark-hive_${SCALA_VERSION}-${SPARK_VERSION}.jar \
         jars/aws-java-sdk-bundle-1.12.262.jar \
         jars/aws-java-sdk-s3-1.12.262.jar \
         jars/aws-java-sdk-core-1.12.262.jar \
-        # jars/delta-core_2.12-2.4.0.jar \
         jars/hadoop-aws-3.3.4.jar \
         jars/hadoop-common-3.3.4.jar \
         # jars/hadoop-client-3.3.4.jar \
         # jars/hadoop-mapreduce-client-core-3.3.4.jar \
+        jars/delta-core_2.13-2.4.0.jar \
+        jars/delta-hive_2.13-3.1.0.jar \
+        jars/delta-spark_2.13-3.1.0.jar \
+        jars/delta-storage-3.1.0.jar \
      ${SPARK_HOME}/jars/
 
 # Spark setup
@@ -85,5 +89,5 @@ EXPOSE 4040 7077 8080 18080
 
 # Copy scripts and set permissions
 RUN cd /
-COPY spark-master.sh spark-worker.sh entrypoint.sh /
+COPY entrypoint.sh /
 RUN chmod u+x /entrypoint.sh
