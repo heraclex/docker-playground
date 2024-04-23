@@ -79,6 +79,8 @@ services:
       interval: 5s
       retries: 5
     privileged: true
+    networks:
+      - small-delta-lake
 
   metabase:
     container_name: metabase
@@ -106,13 +108,15 @@ services:
       context: ./hive
       dockerfile: Dockerfile
     container_name: hive
-    image: local/hive
+    image: local/hive:3.0.0
     profiles: ["hive"]
     ports:
       - '9083:9083'      
     depends_on:
       - postgres
       - minio
+    networks:
+      - small-delta-lake
 
   minio:
     build:
@@ -133,6 +137,9 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    networks:
+      small-delta-lake:
+        ipv4_address: 172.16.0.2
   
   superset:
     # image: arezamoosavi/superset:latest
@@ -334,6 +341,8 @@ services:
       - 8080:8080
       # - 18080:18080 
     command: sh entrypoint.sh master
+    networks:
+      - small-delta-lake
 
   spark-worker-1:
     build:
@@ -348,6 +357,8 @@ services:
     command: sh entrypoint.sh worker
     depends_on:
       - spark-master
+    networks:
+      - small-delta-lake
   
   spark-worker-2:
     build:
@@ -362,6 +373,8 @@ services:
     command: sh entrypoint.sh worker
     depends_on:
       - spark-master
+    networks:
+      - small-delta-lake
   
   spark-history:
     build:
@@ -377,6 +390,8 @@ services:
     command: sh entrypoint.sh history
     depends_on:
       - spark-master
+    networks:
+      - small-delta-lake
     
 
 
@@ -401,3 +416,11 @@ services:
     volumes:
       - ./trino/worker_config.properties:/usr/trino/etc/config.properties
       - ./trino/etc/catalog:/usr/trino/etc/catalog
+
+networks:
+  small-delta-lake:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.0.0/24
+          gateway: 172.16.0.1
