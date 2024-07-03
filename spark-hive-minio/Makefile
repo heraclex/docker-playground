@@ -38,6 +38,12 @@ spark-down:
 airflow:
 	docker-compose up -d postgres redis airflow-init airflow-webserver airflow-scheduler airflow-worker airflow-triggerer
 
+airflow-1: 
+	docker compose -f docker-compose.yml -f airflow/compose.airflow.yml --profile airflow up -d
+
+spark-airflow:
+	docker compose -f docker-compose.yml -f airflow/compose.airflow.yml -f spark/compose.spark.yml --profile airflow --profile spark up -d
+
 down-v:
 	docker-compose down -v
 	sleep 3
