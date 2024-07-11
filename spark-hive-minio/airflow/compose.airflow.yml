@@ -1,11 +1,9 @@
-version: '3.1'
-
 # For airflow-common settings
 x-airflow-common:
   &airflow-common
   # image: apache/airflow:2.7.3
   image: local/airflow:2.7.3
-  profiles: ["airflow"]
+  profiles: [airflow]
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
