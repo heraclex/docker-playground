@@ -21,7 +21,7 @@ services:
   #     - ./.shared:/root/shared
 
   postgres:
-    profiles: [airflow]
+    profiles: ["airflow", "hive", "spark", "metabase"]
     build:
       context: ./postgres
       dockerfile: Dockerfile
@@ -75,20 +75,20 @@ services:
   #   networks:
   #     - delta-net
 
-  # hive:
-  #   build:
-  #     context: ./hive
-  #     dockerfile: Dockerfile
-  #   container_name: hive
-  #   image: local/hive:3.0.0
-  #   profiles: ["hive"]
-  #   ports:
-  #     - '9083:9083'      
-  #   depends_on:
-  #     - postgres
-  #     - minio
-  #   networks:
-  #     - delta-net
+  hive:
+    build:
+      context: ./hive
+      dockerfile: Dockerfile
+    container_name: hive
+    image: local/hive:3.0.0
+    profiles: ["hive"]
+    ports:
+      - '9083:9083'      
+    depends_on:
+      - postgres
+      - minio
+    networks:
+      - delta-net
 
   # minio:
   #   build:

@@ -18,9 +18,9 @@ x-airflow-common:
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
   volumes:
-    - ./.storage/dags:/opt/airflow/dags
-    - ./.storage/logs:/opt/airflow/logs
-    - ./.storage/plugins:/opt/airflow/plugins
+    - ./airflow/.storage/dags:/opt/airflow/dags
+    - ./airflow/.storage/logs:/opt/airflow/logs
+    - ./airflow/.storage/plugins:/opt/airflow/plugins
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -196,7 +196,3 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-
-networks:
-  delta-net:
-    external: true

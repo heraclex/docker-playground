@@ -1,4 +1,4 @@
-.PHONY: hive trino superset down
+.PHONY: hive trino superset
 
 minio-build-image:
 	docker build minio/. --no-cache -t local/minio:linux-arm64
@@ -30,10 +30,10 @@ spark-build-image:
 	docker build spark/. --no-cache -t local/spark:3.5.1
 
 spark-up:
-	docker-compose up -d spark-master spark-worker-1 spark-worker-2 spark-history
+	docker compose -f docker-compose.yml -f spark/compose.spark.yml --profile spark up -d
 
 spark-down:
-	docker-compose down -v spark-master spark-worker-1 spark-worker-2 spark-history
+	docker compose -f docker-compose.yml -f spark/compose.spark.yml --profile spark down -v
 
 airflow-build-image:
 	docker build airflow/. --no-cache -t local/airflow:2.7.3
@@ -47,11 +47,7 @@ airflow-down:
 spark-airflow-up:
 	docker compose -f docker-compose.yml -f airflow/compose.airflow.yml -f spark/compose.spark.yml --profile airflow --profile spark airflow up -d
 
-down-v:
+down-all: | airflow-down spark-down hive-down
 	docker-compose down -v
 	sleep 3
-	rm -rf .storage
-
-
-# airflow:
-# 	docker-compose up -d postgres redis airflow-init airflow-webserver airflow-scheduler airflow-worker airflow-triggerer
+	rm -rf */.storage
