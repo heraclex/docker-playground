@@ -60,7 +60,7 @@ services:
   #     - '3001:3000'
   #   volumes:
   #     # declare your mount volume /host/dir:/container/dir
-  #     - ./.storage/metabase:/metabase-data
+  #     - ./metabase/.storage:/metabase-data
   #   environment:
   #     MB_DB_TYPE: postgres
   #     MB_DB_DBNAME: metabase
@@ -103,7 +103,7 @@ services:
       - '9000:9000'
       - "9001:9001"
     volumes:
-      - ./.storage/minio:/data
+      - ./minio/.storage:/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://minio:9000/minio/health/live"]
       interval: 30s
@@ -132,7 +132,7 @@ services:
   #   ports:
   #     - 8088:8088
   #   volumes:
-  #     - ./.storage/superset:/superset
+  #     - ./superset/.storage:/superset
   #   # restart: unless-stopped
   #   depends_on:
   #     - postgres
