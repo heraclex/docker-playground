@@ -50,4 +50,5 @@ spark-airflow-up:
 down-all: | airflow-down spark-down hive-down
 	docker-compose down -v
 	sleep 3
+	rm -rf .storage
 	rm -rf */.storage

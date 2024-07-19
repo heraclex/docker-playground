@@ -18,7 +18,7 @@ RUN curl --progress-bar -L --retry 3 \
     chown -R root:root "${HADOOP_HOME}"
 
 
-# Hive
+# Hive Metastore
 ARG METASTORE_VERSION=3.0.0
 ENV HIVE_HOME /usr/hive-standalone-metastore
 ENV PATH "${PATH}:${HIVE_HOME}/bin"
